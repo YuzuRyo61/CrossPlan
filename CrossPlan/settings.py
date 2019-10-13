@@ -28,6 +28,7 @@ SECRET_KEY = 'cyqn*4fex969ey3f8v(y^_lg)n_b^*@5&_n7&bv0=8bu#uy_6r'
 DEBUG = True if os.environ.get('CP_ENV', 'development') == 'development' else False
 
 ALLOWED_HOSTS = [
+    "localhost",
     os.environ.get('CP_ENDPOINT', 'localhost')
 ]
 
@@ -135,3 +136,5 @@ AUTH_USER_MODEL = 'fediverse.User'
 CELERY_RESULT_BACKEND = 'django-db'
 
 CELERY_BROKER_URL = os.environ.get('CP_REDIS_URL', 'redis://localhost:6379/1')
+
+CP_ENDPOINT = os.environ.get('CP_ENDPOINT', 'localhost:8000')
