@@ -1,0 +1,2 @@
+def Outbox(request):
+    pass

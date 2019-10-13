@@ -14,8 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+from Web import views as WebViews
+from fediverse.views.WebFinger import WebFinger_HostMeta, WebFinger_res
 
 urlpatterns = [
     path('ACP/', admin.site.urls),
+    path('.well-known/hostmeta', WebFinger_HostMeta),
+    path('.well-known/webfinger', WebFinger_res),
+    path('AP/', include('fediverse.urls')),
+    path('user/<username>', WebViews.User, name="UserShow")
 ]
