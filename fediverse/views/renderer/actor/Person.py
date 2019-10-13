@@ -15,7 +15,7 @@ def RenderUser(username):
     return {
         "type": "Service" if target.is_bot else "Person",
         "id": f"https://{settings.CP_ENDPOINT}/user/{target.username}",
-        "name": target.display_name,
+        "name": target.display_name if target.display_name != '' else None,
         "preferredUsername": target.username,
         "summary": target.description,
         "inbox": f"https://{settings.CP_ENDPOINT}/AP/user/{target.username}/inbox",
