@@ -90,6 +90,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('CP_DB_PASS', 'password'),
         'HOST': os.environ.get('CP_DB_HOST', 'localhost'),
         'PORT': str(os.environ.get('CP_DB_PORT', '5432')),
+        'TEST': {
+            'NAME': 'test_crossplan'
+        }
     }
 }
 
