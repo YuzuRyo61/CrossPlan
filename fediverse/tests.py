@@ -30,4 +30,3 @@ class APResponseTests(TestCase):
         self.assertEqual(resDict.get('type'), "Service", "Should user is not bot(Should return Service)")
         self.assertEqual(resDict.get('preferredUsername'), TESTUSER, "preferredUsername is username")
         self.assertEqual(type(resDict.get('publicKey')), dict, "Should publicKey is dict")
-       
