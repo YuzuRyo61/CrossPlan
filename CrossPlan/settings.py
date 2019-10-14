@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import socket
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -22,13 +23,14 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'cyqn*4fex969ey3f8v(y^_lg)n_b^*@5&_n7&bv0=8bu#uy_6r'
+SECRET_KEY = os.environ.get('CP_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get('CP_ENV', 'development') == 'development' else False
 
 ALLOWED_HOSTS = [
     "localhost",
+    "192.168.1.18",
     os.environ.get('CP_ENDPOINT', 'localhost')
 ]
 
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'django_celery_results',
+    'channels',
     'fediverse',
     'Web'
 ]
@@ -139,6 +142,17 @@ AUTH_USER_MODEL = 'fediverse.User'
 
 CELERY_RESULT_BACKEND = 'django-db'
 
-CELERY_BROKER_URL = os.environ.get('CP_REDIS_URL', 'redis://localhost:6379/1')
+CELERY_BROKER_URL = f'redis://{os.environ.get("CP_REDIS_HOST", "localhost")}:{str(os.environ.get("CP_REDIS_PORT", "6379"))}/1'
 
 CP_ENDPOINT = os.environ.get('CP_ENDPOINT', 'localhost:8000')
+
+ASGI_APPLICATION = 'CrossPlan.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(os.environ.get('CP_REDIS_HOST', 'localhost'), int(os.environ.get('CP_REDIS_PORT', 6379)))],
+        },
+    },
+}
