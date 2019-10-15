@@ -30,6 +30,7 @@ DEBUG = True if os.environ.get('CP_ENV', 'development') == 'development' else Fa
 
 ALLOWED_HOSTS = [
     "localhost",
+    "127.0.0.1",
     "192.168.1.18",
     os.environ.get('CP_ENDPOINT', 'localhost')
 ]
@@ -66,7 +67,9 @@ ROOT_URLCONF = 'CrossPlan.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'Web', 'template')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -156,3 +159,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static")
+]
