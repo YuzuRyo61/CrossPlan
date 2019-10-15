@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}CrossPlan{% endblock %}</title>
+
+        <link rel="stylesheet" href="{% static 'semantic/semantic.min.css' %}">
+    </head>
+    <body>
+        <div class="ui top fixed menu">
+            <a class="item">Features</a>
+            <a class="item">Testimonials</a>
+            <a class="item">Sign-in</a>
+        </div>
+        <main>
+            <div class="ui container">
+                {% block body %}{% endblock %}                
+            </div>
+        </main>        
+        <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'semantic/semantic.min.js' %}"></script>
+    </body>
+</html>
