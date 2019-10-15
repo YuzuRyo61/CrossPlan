@@ -1,0 +1,35 @@
+{% extends '__head.html' %}
+
+{% block title %}ログイン | CrossPlan{% endblock %}
+
+{% block body %}
+<h1>ログイン</h1>
+<hr />
+{% if user.is_authenticated %}
+<p>既にログイン済みです。<a href="{% url 'Logout' %}">別のユーザーでログインしますか？</a></p>
+{% else %}
+<form method="POST" class="ui form">
+    {% if next %}
+    <div class="ui yellow message">
+        <div class="header">ログインが必要です。</div>
+        <p>指定されたページを表示するにはログインが必要です。</p>
+    </div>
+    {% endif %}
+    {% if form.non_field_errors %}
+    <div class="ui negative message">
+        <div class="header">以下の項目を確認してください。</div>
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+    {% for field in form %}
+        <div class="field">
+            <label>{{ field.name }}</label>
+            {{ field }}
+        </div>
+    {% endfor %}
+    {% csrf_token %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <button class="ui button primary fluid" type="submit">ログイン</button>
+</form>
+{% endif %}
+{% endblock %}

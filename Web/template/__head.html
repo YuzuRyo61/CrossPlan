@@ -3,22 +3,40 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width-device-width, initial-scale=1, shrink-to-fit=no">
+
         <title>{% block title %}CrossPlan{% endblock %}</title>
 
         <link rel="stylesheet" href="{% static 'semantic/semantic.min.css' %}">
     </head>
     <body>
-        <div class="ui top fixed menu">
-            <a class="item">Features</a>
-            <a class="item">Testimonials</a>
-            <a class="item">Sign-in</a>
+        <div class="ui top fixed menu stackable">
+            <a class="item" href="{% url 'INDEX' %}"><b>Soloboard</b></a>
+            {% if user.is_authenticated %}
+            <div class="item ui pointing dropdown link">
+                <span class="text">{{ user.username }}</span>
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item" href="{% url 'UserShow' user.username %}">プロフィール</a>
+                    {% if user.is_staff %}
+                    <div class="divider"></div>
+                    <a class="item" href="{% url 'admin:index' %}">管理画面へ</a>
+                    {% endif %}
+                    <div class="divider"></div>
+                    <a class="item" href="{% url 'Logout' %}">ログアウト</a>
+                </div>
+            </div>
+            {% else %}
+            <a class="item" href="{% url 'Login' %}">ログイン</a>
+            {% endif %}
         </div>
-        <main>
+        <main style="padding-top: 50px;">
             <div class="ui container">
                 {% block body %}{% endblock %}                
             </div>
         </main>        
         <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/semantic.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'semantic/runDropdown.js' %}"></script>
     </body>
 </html>

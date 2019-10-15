@@ -1,1 +1,3 @@
 {% extends '__head.html' %}
+
+{% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}

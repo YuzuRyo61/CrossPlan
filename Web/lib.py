@@ -3,7 +3,6 @@ def isAPHeader(request):
         return True
     elif request.method == "GET":
         httpAcceptRaw = request.META.get("HTTP_ACCEPT")
-        print(f"Accept: {httpAcceptRaw}")
         if httpAcceptRaw == None:
             return False
         httpAccept = httpAcceptRaw.split(",")

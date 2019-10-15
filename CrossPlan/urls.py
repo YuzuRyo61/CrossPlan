@@ -20,9 +20,12 @@ from Web import views as WebViews
 from fediverse.views.WebFinger import WebFinger_HostMeta, WebFinger_res
 
 urlpatterns = [
+    path('', WebViews.INDEX, name="INDEX"),
     path('ACP/', admin.site.urls),
     path('.well-known/hostmeta', WebFinger_HostMeta),
     path('.well-known/webfinger', WebFinger_res),
     path('AP/', include('fediverse.urls')),
-    path('user/<username>', WebViews.User, name="UserShow")
+    path('user/<username>', WebViews.User, name="UserShow"),
+    path('login', WebViews.LoginView.as_view(), name="Login"),
+    path('logout', WebViews.LogoutView.as_view(), name="Logout")
 ]
