@@ -13,7 +13,7 @@
         <div class="ui top fixed menu stackable">
             <a class="item" href="{% url 'INDEX' %}"><b>Soloboard</b></a>
             {% if user.is_authenticated %}
-            <div class="item ui pointing dropdown link">
+            <div class="item ui right dropdown link">
                 <span class="text">{{ user.username }}</span>
                 <i class="dropdown icon"></i>
                 <div class="menu">
@@ -27,7 +27,7 @@
                 </div>
             </div>
             {% else %}
-            <a class="item" href="{% url 'Login' %}">ログイン</a>
+            <a class="item right" href="{% url 'Login' %}">ログイン</a>
             {% endif %}
         </div>
         <main style="padding-top: 50px;">
