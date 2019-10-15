@@ -5,7 +5,7 @@ from channels.generic.websocket import WebsocketConsumer
 
 class TimelineConsumer(WebsocketConsumer):
     def connect(self):
-        self.tlMethod = self.scope['url_route']['kwargs']['room_name']
+        self.tlMethod = self.scope['url_route']['kwargs']['stream_name']
         self.tlId = f"timeline_{self.tlMethod}"
         if self.tlMethod == "local" or self.tlMethod == "global" or self.tlMethod == "home":
             async_to_sync(self.channel_layer.group_add)(
@@ -16,7 +16,6 @@ class TimelineConsumer(WebsocketConsumer):
             return
         else:
             self.disconnect(1)
-
     
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
