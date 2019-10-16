@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from urllib.parse import urlparse
 import requests
+import markdown
 
 from fediverse.models import Post, User
 from fediverse.lib import sign_header
@@ -20,7 +21,7 @@ def APSend(targetUrl, fromUser, dct):
 def NewPost(fromUser, post_content):
     targetUser = User.objects.get(username__iexact=fromUser)
     newPost = Post(
-        body=post_content['body'],
+        body=markdown.Markdown().convert(post_content['body']),
         parent=targetUser
     )
     newPost.save()
