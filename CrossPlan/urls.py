@@ -27,5 +27,6 @@ urlpatterns = [
     path('AP/', include('fediverse.urls')),
     path('user/<username>', WebViews.User, name="UserShow"),
     path('login', WebViews.LoginView.as_view(), name="Login"),
-    path('logout', WebViews.LogoutView.as_view(), name="Logout")
+    path('logout', WebViews.LogoutView.as_view(), name="Logout"),
+    path('_NEWPOST', WebViews.newPost, name="NewPost")
 ]

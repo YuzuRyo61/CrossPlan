@@ -12,31 +12,59 @@
     <body>
         <div class="ui top fixed menu stackable">
             <a class="item" href="{% url 'INDEX' %}"><b>Soloboard</b></a>
-            {% if user.is_authenticated %}
-            <div class="item ui right dropdown link">
-                <span class="text">{{ user.username }}</span>
-                <i class="dropdown icon"></i>
-                <div class="menu">
-                    <a class="item" href="{% url 'UserShow' user.username %}">プロフィール</a>
-                    {% if user.is_staff %}
-                    <div class="divider"></div>
-                    <a class="item" href="{% url 'admin:index' %}">管理画面へ</a>
-                    {% endif %}
-                    <div class="divider"></div>
-                    <a class="item" href="{% url 'Logout' %}">ログアウト</a>
+            <div class="right menu">
+                {% if user.is_authenticated %}
+                <div class="right icon item link" id="newPostButton" title="新規投稿">
+                    <i class="pencil alternate icon"></i>
                 </div>
+                <div class="item ui right dropdown link">
+                    <span class="text">{{ user.username }}</span>
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <a class="item" href="{% url 'UserShow' user.username %}">プロフィール</a>
+                        {% if user.is_staff %}
+                        <div class="divider"></div>
+                        <a class="item" href="{% url 'admin:index' %}">管理画面へ</a>
+                        {% endif %}
+                        <div class="divider"></div>
+                        <a class="item" href="{% url 'Logout' %}">ログアウト</a>
+                    </div>
+                </div>
+                {% else %}
+                <a class="item right" href="{% url 'Login' %}">ログイン</a>
+                {% endif %}
             </div>
-            {% else %}
-            <a class="item right" href="{% url 'Login' %}">ログイン</a>
-            {% endif %}
         </div>
         <main style="padding-top: 50px;">
             <div class="ui container">
                 {% block body %}{% endblock %}                
             </div>
-        </main>        
+        </main>
+        {% if user.is_authenticated %}
+        <div class="ui modal tiny" id="newPostModal">
+                <i class="close icon"></i>
+                <div class="header">新規投稿</div>
+                <div class="content">
+                    <form method="POST" action="{% url 'NewPost' %}" id="newPostForm" name="newPostForm" class="ui form" onsubmit="return false;">
+                        {% for field in NewPostForm_ %}
+                            <div class="field">
+                                <label>{{ field.name }}</label>
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+                        {% csrf_token %}
+                    </form>
+                </div>
+                <div class="actions">
+                    <button class="ui primary button" id="postSubmit">投稿</button>
+                </div>
+        </div>
+        {% endif %}
         <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/semantic.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/runDropdown.js' %}"></script>
+        {% if user.is_authenticated %}
+        <script type="text/javascript" src="{% static 'semantic/newPostModal.js' %}"></script>
+        {% endif %}
     </body>
 </html>
