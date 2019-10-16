@@ -8,6 +8,7 @@
         <title>{% block title %}CrossPlan{% endblock %}</title>
 
         <link rel="stylesheet" href="{% static 'semantic/semantic.min.css' %}">
+        <link rel="stylesheet" href="{% static 'semantic/Semantic-UI-Alert.css' %}">
     </head>
     <body>
         <div class="ui top fixed menu">
@@ -62,7 +63,9 @@
         {% endif %}
         <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/semantic.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'semantic/Semantic-UI-Alert.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/runDropdown.js' %}"></script>
+        <script type="text/javascript" src="{% static 'shortcutKey.js' %}"></script>
         {% if user.is_authenticated %}
         <script type="text/javascript" src="{% static 'semantic/newPostModal.js' %}"></script>
         {% endif %}

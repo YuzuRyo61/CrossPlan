@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseNotAllowed, HttpResponse
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
@@ -12,7 +12,7 @@ from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
-from .forms import LoginForm
+from .forms import LoginForm, NewPostForm
 from .lib import isAPHeader, render_NPForm, panigateQuery
 
 # Create your views here.
@@ -47,6 +47,9 @@ def newPost(request):
     if request.method != "POST":
         return HttpResponseNotAllowed("POST")
 
-    NewPostTask(request.user.username, request.POST)
+    if NewPostForm(request.POST).is_valid():
+        NewPostTask(request.user.username, request.POST)
+    else:
+        return HttpResponseBadRequest()
 
     return HttpResponse(status=204)
