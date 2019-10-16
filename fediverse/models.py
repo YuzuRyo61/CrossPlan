@@ -84,6 +84,9 @@ class FediverseUser(models.Model):
 class Post(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     body = models.TextField(blank=True, null=True)
-    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="boards", blank=True, null=True)
-    parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="boards", blank=True, null=True)
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
+    parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
     posted = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-posted', )

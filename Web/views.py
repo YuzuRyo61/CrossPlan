@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http.response import HttpResponseNotAllowed, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,7 +13,7 @@ from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
 from .forms import LoginForm
-from .lib import isAPHeader, render_NPForm
+from .lib import isAPHeader, render_NPForm, panigateQuery
 
 # Create your views here.
 class LoginView(LoginView): # pylint: disable=function-redefined
@@ -27,10 +28,15 @@ def User(request, username):
         return APResponse(APRender(RenderUser(username)))
     else:
         targetUser = get_object_or_404(UserModel, username__iexact=username)
-        if request.user.is_authenticated():
-            return render_NPForm(request, "profile.html", {"targetUser": targetUser})
+        renderObj = {
+            "targetUser": targetUser,
+            "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE)
+        }
+        renderTarget = "profile.html"
+        if request.user.is_authenticated:
+            return render_NPForm(request, renderTarget, renderObj)
         else:
-            return render(request, "profile.html", {"targetUser": targetUser})
+            return render(request, renderTarget, renderObj)
 
 @login_required
 def INDEX(request):

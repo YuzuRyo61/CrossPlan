@@ -10,8 +10,8 @@
         <link rel="stylesheet" href="{% static 'semantic/semantic.min.css' %}">
     </head>
     <body>
-        <div class="ui top fixed menu stackable">
-            <a class="item" href="{% url 'INDEX' %}"><b>Soloboard</b></a>
+        <div class="ui top fixed menu">
+            <a class="item" href="{% url 'INDEX' %}"><b>CrossPlan</b></a>
             <div class="right menu">
                 {% if user.is_authenticated %}
                 <div class="right icon item link" id="newPostButton" title="新規投稿">
@@ -35,9 +35,9 @@
                 {% endif %}
             </div>
         </div>
-        <main style="padding-top: 50px;">
+        <main style="padding-top: 7em;">
             <div class="ui container">
-                {% block body %}{% endblock %}                
+                {% block body %}{% endblock %}
             </div>
         </main>
         {% if user.is_authenticated %}

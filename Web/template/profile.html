@@ -1,3 +1,92 @@
 {% extends '__head.html' %}
 
 {% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}
+
+{% block body %}
+<h1 class="ui header">
+    {% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}
+    <div class="sub header">@{{ user.username }}</div>
+</h1>
+<hr>
+<div class="ui stackable grid">
+    <div class="four wide column">
+        <div class="ui segment">
+            <div>
+                {% if targetUser.description %}
+                    {{ targetUser.description|safe }}
+                {% else %}
+                    <em>説明なし</em>
+                {% endif %}
+            </div>
+            <hr>
+            <p>{{ targetUser.registered }} 登録</p>
+        </div>
+        <div class="ui segment">
+            <div class="ui relaxed divided list">
+                <div class="item">
+                    <div class="content">
+                        <a class="header" href="{% url 'UserShow' targetUser.username %}">投稿</a>
+                        <div class="description">{{ targetUser.posts.all.count }}</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <a class="header">フォロー</a>
+                        <div class="description">0</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <a class="header">フォロワー</a>
+                        <div class="description">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="twelve wide column">
+        {% for posts in targetUserPosts %}
+        <div class="ui segment">
+            <h4 class="ui header">
+                {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
+                <div class="sub header">@{{ posts.parent.username }}</div>
+                <small>{{ posts.posted }}</small>
+            </h4>
+            <br>
+            <div>
+                {{ posts.body|safe }}
+            </div>
+        </div>
+        {% empty %}
+        <p>このユーザーはまだ何も投稿していません。</p>
+        {% endfor %}
+        <div class="ui centered grid">
+            <div class="center aligned column">
+                <div class="ui pagination menu">
+                    {% if targetUserPosts.has_previous %}
+                    <a class="item" href="?page={{ targetUserPosts.previous_page_number }}">前へ</a>
+                    {% else %}
+                    <div class="disabled item">前へ</div>
+                    {% endif %}
+                    {% for link_page in targetUserPosts.paginator.page_range %}
+                        {% if link_page %}
+                            {% if link_page == targetUserPosts.number %}
+                            <a class="active item" href="#">{{ link_page }}</a>
+                            {% else %}
+                            <a class="active item" href="?page={{ link_page }}">{{ link_page }}</a>
+                            {% endif %}
+                        {% else %}
+                        <div class="disabled item">...</div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if targetUserPosts.has_next %}
+                    <a class="item" href="?page={{ targetUserPosts.next_page_number }}">次へ</a>
+                    {% else %}
+                    <div class="disabled item">次へ</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

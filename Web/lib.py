@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from Web.forms import NewPostForm
 
@@ -31,3 +32,14 @@ def isAPHeader(request):
 def render_NPForm(request, template_name, context={}, content_type=None, status=None, using=None):
     context.update({'NewPostForm_': NewPostForm()})
     return render(request, template_name, context=context, content_type=content_type, status=status, using=using)
+
+def panigateQuery(request, queryset, count):
+    paginator = Paginator(queryset, count)
+    page = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+    return page_obj
