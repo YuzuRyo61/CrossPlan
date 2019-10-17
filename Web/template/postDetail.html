@@ -12,11 +12,16 @@
 </div>
 <small>{{ post.posted }}</small>
 <hr>
+{% if user.is_authenticated %}
 <div class="ui buttons">
     <button class="ui button"><i class="reply icon"></i> 返信</button>
+    {% if user == post.parent %}
     <button class="negative ui button" id="deleteButton"><i class="trash icon"></i> 削除</button>
+    {% endif %}
 </div>
+{% endif %}
 
+{% if user.is_authenticated and user == post.parent %}
 <div class="ui basic modal" id="deleteConfirmModal">
     <div class="ui icon header">
         <i class="trash icon"></i>
@@ -40,9 +45,11 @@
         {% csrf_token %}
     </form>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block script %}
+{% if user.is_authenticated and user == post.parent %}
 <script>
 $('#deleteButton').click(function () {
     $('#deleteConfirmModal')
@@ -55,4 +62,5 @@ $('#deleteButton').click(function () {
         .modal('show')
 })
 </script>
+{% endif %}
 {% endblock %}
