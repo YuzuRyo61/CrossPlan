@@ -91,3 +91,9 @@ class Post(models.Model):
 
     class Meta:
         ordering = ('-posted', )
+
+class Like(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked"),
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked")
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked")
