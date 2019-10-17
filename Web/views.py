@@ -2,7 +2,7 @@ import json
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
@@ -72,11 +72,12 @@ def favorite(request):
 def postDelete(request):
     if request.method != "POST":
         return HttpResponseNotAllowed("POST")
-    
     target = get_object_or_404(PostModel, uuid=request.POST.get('uuid'))
-    target.delete()
-
-    return HttpResponseRedirect(reverse("INDEX"))
+    if request.user == target.parent:
+        target.delete()
+        return HttpResponseRedirect(reverse("INDEX"))
+    else:
+        return HttpResponseForbidden()
 
 def postDetail(request, uuid):
     post = get_object_or_404(PostModel, uuid=uuid)
