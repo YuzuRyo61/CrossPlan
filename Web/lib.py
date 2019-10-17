@@ -30,7 +30,8 @@ def isAPHeader(request):
         return None
 
 def render_NPForm(request, template_name, context={}, content_type=None, status=None, using=None):
-    context.update({'NewPostForm_': NewPostForm()})
+    if request.user.is_authenticated:
+        context.update({'NewPostForm_': NewPostForm()})
     return render(request, template_name, context=context, content_type=content_type, status=status, using=using)
 
 def panigateQuery(request, queryset, count):

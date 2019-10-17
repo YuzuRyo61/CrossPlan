@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest
@@ -7,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 
 from CrossPlan.tasks import NewPost as NewPostTask
 
-from fediverse.models import User as UserModel
+from fediverse.models import User as UserModel, Post as PostModel
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
@@ -33,10 +35,7 @@ def User(request, username):
             "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE)
         }
         renderTarget = "profile.html"
-        if request.user.is_authenticated:
-            return render_NPForm(request, renderTarget, renderObj)
-        else:
-            return render(request, renderTarget, renderObj)
+        return render_NPForm(request, renderTarget, renderObj)
 
 @login_required
 def INDEX(request):
@@ -50,6 +49,21 @@ def newPost(request):
     if NewPostForm(request.POST).is_valid():
         NewPostTask(request.user.username, request.POST)
     else:
-        return HttpResponseBadRequest()
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "DO_NOT_EMPTY",
+            "msg": "空の投稿は投稿できません。"
+        }}), content_type="application/json")
 
     return HttpResponse(status=204)
+
+@login_required
+def announce(request):
+    pass
+
+@login_required
+def favorite(request):
+    pass
+
+def postDetail(request, uuid):
+    post = get_object_or_404(PostModel, uuid=uuid)
+    return render_NPForm(request, "postDetail.html", {"post": post})

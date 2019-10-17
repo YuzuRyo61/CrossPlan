@@ -4,7 +4,16 @@ from fediverse import models
 
 # Register your models here.
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'display_name', 'is_bot', 'is_suspended', 'is_active', 'registered', 'updated')
+    list_display = (
+        'username',
+        'display_name',
+        'is_bot',
+        'is_suspended',
+        'is_staff',
+        'is_active',
+        'registered',
+        'updated'
+    )
     fieldsets = [
         ("基本情報", {
             "fields": [

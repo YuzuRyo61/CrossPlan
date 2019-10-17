@@ -1,0 +1,14 @@
+{% extends '__head.html' %}
+
+{% block title %}| CrossPlan{% endblock %}
+
+{% block body %}
+<h1 class="ui header">
+    {% if post.parent.display_name %}{{ post.parent.display_name }}{% else %}{{ post.parent.username }}{% endif %}
+    <div class="sub header">@{{ post.parent.username }}</div>
+</h1>
+<div class="post">
+    {{ post.body|safe }}
+</div>
+<small>{{ post.posted }}</small>
+{% endblock %}

@@ -28,11 +28,12 @@ $('#postSubmit').click(function () {
                 time: 3,
             })
         })
-        .fail(function () {
-            console.error("Post failed!")
+        .fail(function (jqXHR) {
+            var res = JSON.parse(jqXHR.responseText)
+            console.error("Post failed!: " + res.error.msg)
             $.uiAlert({
                 textHead: '投稿できません。',
-                text: '何かしらのエラーにより投稿ができませんでした。再度やり直してください。',
+                text: res.error.msg,
                 bgcolor: '#DB2828',
                 textcolor: '#fff',
                 position: 'bottom-left',

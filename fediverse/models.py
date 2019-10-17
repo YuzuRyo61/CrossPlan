@@ -85,6 +85,8 @@ class Post(models.Model):
     body = models.TextField(blank=True, null=True)
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
     parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
+    announceTo = models.TextField(blank=True, null=True)
+    replyTo = models.TextField(blank=True, null=True)
     posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:

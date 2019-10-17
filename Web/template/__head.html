@@ -9,6 +9,15 @@
 
         <link rel="stylesheet" href="{% static 'semantic/semantic.min.css' %}">
         <link rel="stylesheet" href="{% static 'semantic/Semantic-UI-Alert.css' %}">
+
+        <style>
+            img.emoji {
+                height:1em;
+                width:1em;
+                margin:0 .05em 0 .1em;
+                vertical-align:-0.1em;
+            }
+        </style>
     </head>
     <body>
         <div class="ui top fixed menu">
@@ -64,10 +73,18 @@
         <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/semantic.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/Semantic-UI-Alert.js' %}"></script>
+        <script src="https://twemoji.maxcdn.com/v/12.1.3/twemoji.min.js" integrity="sha384-PEQg4NJbyXT+TJJVKYN9zmD5ehVaV3TiBdzovT7WkshNClGNg8+bk4hKQ+lGrgaw" crossorigin="anonymous"></script>
+        <script type="text/javascript">twemoji.parse(document.body)</script>
         <script type="text/javascript" src="{% static 'semantic/runDropdown.js' %}"></script>
         <script type="text/javascript" src="{% static 'shortcutKey.js' %}"></script>
         {% if user.is_authenticated %}
+        <script type="text/javascript">
+            window.CSRF_TOKEN = '{{ csrf_token }}'
+            window.FAVORITE_LOC = '{% url "Favorite" %}'
+            window.ANNOUNCE_LOC = '{% url "Announce" %}'
+        </script>
         <script type="text/javascript" src="{% static 'semantic/newPostModal.js' %}"></script>
+        <script type="text/javascript" src="{% static 'webtrigger.js' %}"></script>
         {% endif %}
     </body>
 </html>

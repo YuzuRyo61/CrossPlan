@@ -28,5 +28,8 @@ urlpatterns = [
     path('user/<username>', WebViews.User, name="UserShow"),
     path('login', WebViews.LoginView.as_view(), name="Login"),
     path('logout', WebViews.LogoutView.as_view(), name="Logout"),
-    path('_NEWPOST', WebViews.newPost, name="NewPost")
+    path('_NEWPOST', WebViews.newPost, name="NewPost"),
+    path('_ANNOUNCE', WebViews.announce, name="Announce"),
+    path('_FAVORITE', WebViews.favorite, name="Favorite"),
+    path('post/<uuid>', WebViews.postDetail,name="PostDetail")
 ]
