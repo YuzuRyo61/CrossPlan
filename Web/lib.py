@@ -13,10 +13,10 @@ def isAPHeader(request):
         httpCT = httpCTRaw.split(",")
         for i, has in enumerate(httpCT):
             httpCT[i] = has.strip()
-        if "application/activity+json" in httpCT or "application/ld+json" in httpCT:
-            return True
-        else:
-            return False
+        for ct in httpCT:
+            if ct.startswith("application/activity+json") or ct.startswith("application/ld+json"):
+                return True
+        return False
     elif request.method == "GET":
         httpAcceptRaw = request.META.get("HTTP_ACCEPT")
         if httpAcceptRaw == None:
@@ -24,10 +24,10 @@ def isAPHeader(request):
         httpAccept = httpAcceptRaw.split(",")
         for i, has in enumerate(httpAccept):
             httpAccept[i] = has.strip()
-        if "application/activity+json" in httpAccept or "application/ld+json" in httpAccept:
-            return True
-        else:
-            return False
+        for a in httpAccept:
+            if a.startswith("application/activity+json") or a.startswith("application/ld+json"):
+                return True
+        return False
     else:
         return None
 
