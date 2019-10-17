@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -44,3 +46,6 @@ def panigateQuery(request, queryset, count):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
     return page_obj
+
+def scraping(text):
+    return BeautifulSoup(text, features="html.parser").get_text()

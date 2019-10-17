@@ -1,0 +1,11 @@
+{% extends '__head.html' %}
+
+{% block title %}404 Not Found | CrossPlan{% endblock %}
+
+{% block body %}
+<h1 class="ui header">
+    見つかりませんでした。
+</h1>
+<p>お探しのページは見つかりませんでした。</p>
+<a href="{% url 'INDEX' %}" class="ui button primary fluid">トップへ戻る</a>
+{% endblock %}

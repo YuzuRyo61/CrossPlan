@@ -5,7 +5,7 @@
 {% block body %}
 <h1 class="ui header">
     {% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}
-    <div class="sub header">@{{ user.username }}</div>
+    <div class="sub header">@{{ targetUser.username }}</div>
 </h1>
 <hr>
 <div class="ui stackable grid">
@@ -69,9 +69,7 @@
             </a>
             {% endif %}
         </div>
-        {% empty %}
-        <p>このユーザーはまだ何も投稿していません。</p>
-        {% endfor %}
+        {% if forloop.last %}
         <div class="ui centered grid">
             <div class="center aligned column">
                 <div class="ui pagination menu">
@@ -99,6 +97,16 @@
                 </div>
             </div>
         </div>
+        {% endif %}
+        {% empty %}
+        <div class="ui icon message">
+            <i class="inbox icon"></i>
+            <div class="content">
+                <div class="header">投稿がありません。</div>
+                <p>投稿がないか、非公開の投稿のみのどちらかでしょう。</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

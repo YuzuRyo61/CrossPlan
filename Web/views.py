@@ -2,7 +2,8 @@ import json
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
@@ -15,7 +16,7 @@ from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
 from .forms import LoginForm, NewPostForm
-from .lib import isAPHeader, render_NPForm, panigateQuery
+from .lib import isAPHeader, render_NPForm, panigateQuery, scraping
 
 # Create your views here.
 class LoginView(LoginView): # pylint: disable=function-redefined
@@ -37,9 +38,12 @@ def User(request, username):
         renderTarget = "profile.html"
         return render_NPForm(request, renderTarget, renderObj)
 
-@login_required
 def INDEX(request):
-    return render_NPForm(request, 'index.html')
+    if request.user.is_authenticated:
+        return render_NPForm(request, 'index.html')
+    else:
+        superusers = UserModel.objects.filter(is_superuser=True) # pylint: disable=no-member
+        return render(request, 'landing.html', {"endpoint": settings.CP_ENDPOINT, "superusers": superusers})
 
 @login_required
 def newPost(request):
@@ -64,6 +68,16 @@ def announce(request):
 def favorite(request):
     pass
 
+@login_required
+def postDelete(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed("POST")
+    
+    target = get_object_or_404(PostModel, uuid=request.POST.get('uuid'))
+    target.delete()
+
+    return HttpResponseRedirect(reverse("INDEX"))
+
 def postDetail(request, uuid):
     post = get_object_or_404(PostModel, uuid=uuid)
-    return render_NPForm(request, "postDetail.html", {"post": post})
+    return render_NPForm(request, "postDetail.html", {"post": post, "scraped_body": scraping(post.body)})

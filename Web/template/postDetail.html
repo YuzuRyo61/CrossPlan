@@ -1,14 +1,58 @@
 {% extends '__head.html' %}
 
-{% block title %}| CrossPlan{% endblock %}
+{% block title %}{{ scraped_body }} | CrossPlan{% endblock %}
 
 {% block body %}
 <h1 class="ui header">
     {% if post.parent.display_name %}{{ post.parent.display_name }}{% else %}{{ post.parent.username }}{% endif %}
-    <div class="sub header">@{{ post.parent.username }}</div>
+    <div class="sub header"><a href="{% url 'UserShow' post.parent.username %}">@{{ post.parent.username }}</a></div>
 </h1>
 <div class="post">
     {{ post.body|safe }}
 </div>
 <small>{{ post.posted }}</small>
+<hr>
+<div class="ui buttons">
+    <button class="ui button"><i class="reply icon"></i> 返信</button>
+    <button class="negative ui button" id="deleteButton"><i class="trash icon"></i> 削除</button>
+</div>
+
+<div class="ui basic modal" id="deleteConfirmModal">
+    <div class="ui icon header">
+        <i class="trash icon"></i>
+        投稿を削除
+    </div>
+    <div class="content">
+        <p>本当に削除しますか？</p>
+    </div>
+    <div class="actions">
+        <div class="ui basic cancel inverted button">
+        <i class="remove icon"></i>
+        キャンセル
+        </div>
+        <div class="ui negative ok inverted button">
+        <i class="trash icon"></i>
+        削除
+        </div>
+    </div>
+    <form method="POST" action="{% url 'DeletePost' %}" name="deleteTargetForm">
+        <input type="hidden" name="uuid" value="{{ post.uuid }}">
+        {% csrf_token %}
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$('#deleteButton').click(function () {
+    $('#deleteConfirmModal')
+        .modal({
+            closable: false,
+            onApprove: function () {
+                document.deleteTargetForm.submit()
+            }
+        })
+        .modal('show')
+})
+</script>
 {% endblock %}

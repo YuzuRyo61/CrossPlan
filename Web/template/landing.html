@@ -1,0 +1,32 @@
+{% extends '__head.html' %}
+
+{% block body %}
+<h1 class="ui header">
+    CrossPlan
+    <div class="sub header">
+        Python, Djangoで作られたActivityPub準拠SNS
+    </div>
+</h1>
+<hr>
+<div class="ui segment">
+    <h2 class="ui header">このサーバーについて</h2>
+    <ul>
+       <li>アドレス: {{ endpoint }}</li>
+       <li>管理者:
+            <ul>
+                {% for superuser in superusers %}
+                <li><a href="{% url 'UserShow' superuser.username %}">@{{ superuser.username }}</a></li>
+                {% empty %}
+                <li><em>N/A</em></li>
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
+</div>
+<div class="ui segment">
+    <h2 class="ui header">CrossPlanって？</h2>
+    <p>CrossPlanとは、Python及びWebフレームワークのDjangoを使用して作成されたSNSです。</p>
+    <p>また、W3C勧告の<a href="https://activitypub.rocks/" target="_blank">ActivityPub</a>に準拠して作られたSNSのため、この規格に対応したソフトウェアであればあらゆるサーバーから情報を受け取ることができます。</p>
+</div>
+<a class="ui button primary fluid" href="{% url 'Login' %}">始めましょう（ログイン）</a>
+{% endblock %}

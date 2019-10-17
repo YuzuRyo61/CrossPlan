@@ -31,5 +31,6 @@ urlpatterns = [
     path('_NEWPOST', WebViews.newPost, name="NewPost"),
     path('_ANNOUNCE', WebViews.announce, name="Announce"),
     path('_FAVORITE', WebViews.favorite, name="Favorite"),
+    path('_DELETEPOST', WebViews.postDelete, name="DeletePost"),
     path('post/<uuid>', WebViews.postDetail,name="PostDetail")
 ]
