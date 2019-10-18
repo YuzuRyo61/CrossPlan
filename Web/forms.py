@@ -1,7 +1,9 @@
-from django.contrib.auth.forms import AuthenticationForm
+import markdown
+
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django import forms
 
-from fediverse.models import Post
+from fediverse.models import Post, User
 
 class LoginForm(AuthenticationForm):
     pass
@@ -16,3 +18,16 @@ class NewPostForm(forms.ModelForm):
         if body == None or len(body.strip()) <= 0:
             raise forms.ValidationError("投稿を空にすることはできません。")
         return body
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('display_name', 'description', 'is_bot')
+
+    def clean_description(self):
+        description = self.cleaned_data['description']
+        description = markdown.Markdown().convert(description)
+        return description
+
+class Settings_PasswordChangeForm(PasswordChangeForm):
+    pass

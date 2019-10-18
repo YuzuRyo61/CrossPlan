@@ -1,11 +1,12 @@
 import json
+import html2markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.decorators import login_required
 
 from CrossPlan.tasks import NewPost as NewPostTask
@@ -15,7 +16,7 @@ from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
-from .forms import LoginForm, NewPostForm
+from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm
 from .lib import isAPHeader, render_NPForm, panigateQuery, scraping
 
 # Create your views here.
@@ -82,3 +83,32 @@ def postDelete(request):
 def postDetail(request, uuid):
     post = get_object_or_404(PostModel, uuid=uuid)
     return render_NPForm(request, "postDetail.html", {"post": post, "scraped_body": scraping(post.body)})
+
+@login_required
+def settings_profile(request):
+    if request.method == "POST":
+        form = EditProfileForm(request.POST)
+        if form.is_valid():
+            request.user.display_name = form.cleaned_data["display_name"]
+            request.user.description = form.cleaned_data["description"]
+            request.user.is_bot = form.cleaned_data["is_bot"]
+            request.user.save()
+            return HttpResponse(status=204)
+        else:
+            return HttpResponseBadRequest()
+    else:
+        return render_NPForm(request, "settings/profile.html", {"profileForm": 
+            EditProfileForm({
+                "display_name": request.user.display_name,
+                "description": html2markdown.convert(request.user.description),
+                "is_bot": request.user.is_bot
+            })
+        })
+
+class settings_Password(PasswordChangeView):
+    form_class = Settings_PasswordChangeForm
+    success_url = reverse_lazy('Settings_PasswordDone')
+    template_name = "settings/password_change.html"
+
+class settings_PasswordDone(PasswordChangeDoneView):
+    template_name = "settings/password_done.html"

@@ -32,5 +32,8 @@ urlpatterns = [
     path('_ANNOUNCE', WebViews.announce, name="Announce"),
     path('_FAVORITE', WebViews.favorite, name="Favorite"),
     path('_DELETEPOST', WebViews.postDelete, name="DeletePost"),
-    path('post/<uuid>', WebViews.postDetail,name="PostDetail")
+    path('post/<uuid>', WebViews.postDetail,name="PostDetail"),
+    path('settings/profile', WebViews.settings_profile, name="Settings_Profile"),
+    path('settings/password', WebViews.settings_Password.as_view(), name="Settings_Password"),
+    path('settings/password/done', WebViews.settings_PasswordDone.as_view(), name="Settings_PasswordDone"),    
 ]

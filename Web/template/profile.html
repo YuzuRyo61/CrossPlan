@@ -12,6 +12,9 @@
     <div class="four wide column">
         <div class="ui segment">
             <div>
+                {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
+            </div>
+            <div>
                 {% if targetUser.description %}
                     {{ targetUser.description|safe }}
                 {% else %}

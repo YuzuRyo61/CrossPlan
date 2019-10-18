@@ -1,4 +1,5 @@
 {% load static %}
+{% load widget_tweaks %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -21,7 +22,7 @@
     </head>
     <body>
         <div class="ui top fixed menu">
-            <a class="item" href="{% url 'INDEX' %}"><b>CrossPlan</b></a>
+            <a class="item header" href="{% url 'INDEX' %}">CrossPlan</a>
             <div class="right menu">
                 {% if user.is_authenticated %}
                 <div class="right icon item link" id="newPostButton" title="新規投稿">
@@ -32,6 +33,7 @@
                     <i class="dropdown icon"></i>
                     <div class="menu">
                         <a class="item" href="{% url 'UserShow' user.username %}">プロフィール</a>
+                        <a class="item" href="{% url 'Settings_Profile' %}">設定</a>
                         {% if user.is_staff %}
                         <div class="divider"></div>
                         <a class="item" href="{% url 'admin:index' %}">管理画面へ</a>
@@ -59,7 +61,7 @@
                         {% for field in NewPostForm_ %}
                             <div class="field">
                                 <label>{{ field.name }}</label>
-                                {{ field }}
+                                {{ field|add_class:"enableShortcutKey" }}
                             </div>
                         {% endfor %}
                         {% csrf_token %}

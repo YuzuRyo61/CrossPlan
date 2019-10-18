@@ -1,0 +1,59 @@
+{% extends '__head.html' %}
+
+{% block body %}
+<div class="ui stackable grid">
+    <div class="four wide column">
+        <div class="ui vertical menu">
+            <div class="item">
+                <div class="header">設定</div>
+                <div class="menu">
+                    <a class="item" href="{% url 'Settings_Profile' %}">プロフィール</a>
+                    <a class="item" href="{% url 'Settings_Password' %}">パスワード</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="twelve wide column">
+        {% block side %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$('#settingFormSubmit').click(function () {
+    $('#settingForm').addClass("loading")
+    var postFormValue = $('#settingForm').serialize()
+    var postTarget = $('#settingForm').attr('action')
+    $.post(postTarget, postFormValue)
+        .done(function (data) {
+            console.info("Post complete!")
+            console.info(data)
+            $.uiAlert({
+                textHead: '変更しました。',
+                text: '設定内容を保存しました。',
+                bgcolor: '#19c3aa',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'checkmark box',
+                time: 3,
+            })
+        })
+        .fail(function () {
+            console.error("Post failed!: " + res.error.msg)
+            $.uiAlert({
+                textHead: 'エラーが発生しました。',
+                text: '何かしらのエラーが発生しました。',
+                bgcolor: '#DB2828',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'remove circle',
+                time: 5,
+            })
+        })
+        .always(function () {
+            $('#settingForm').removeClass("loading")
+        })
+})
+</script>
+{% endblock %}

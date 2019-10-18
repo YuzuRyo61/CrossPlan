@@ -1,0 +1,32 @@
+{% extends 'settings/__head.html' %}
+
+{% block title %}プロフィール設定 | CrossPlan{% endblock %}
+
+{% block side %}
+<h2 class="ui header">プロフィール設定</h2>
+<hr>
+<form method="POST" class="ui large form" action="{% url 'Settings_Profile' %}" id="settingForm" onsubmit="return false;">
+    <div class="field">
+        <label>ユーザー名</label>
+        <input type="text" disabled value="{{ user.username }}">
+        <small>ユーザー名は変更できません。</small>
+    </div>
+    <div class="field">
+        <label>{{ profileForm.display_name.name }}</label>
+        {{ profileForm.display_name }}
+    </div>
+    <div class="field">
+        <label>{{ profileForm.description.name }}</label>
+        {{ profileForm.description }}
+        <small>Markdown記法が使用できます。</small>
+    </div>
+    <div class="field">
+        <div class="ui checkbox">
+            {{ profileForm.is_bot }}
+            <label>Botとして運用します</label>
+        </div>
+    </div>
+    {% csrf_token %}
+    <button id="settingFormSubmit" type="submit" class="ui button primary fluid">保存</button>
+</form>
+{% endblock %}
