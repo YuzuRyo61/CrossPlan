@@ -81,12 +81,18 @@
         <script type="text/javascript" src="{% static 'shortcutKey.js' %}"></script>
         {% if user.is_authenticated %}
         <script type="text/javascript">
+            window.isNewPostModalActive = false
             window.CSRF_TOKEN = '{{ csrf_token }}'
             window.FAVORITE_LOC = '{% url "Favorite" %}'
             window.ANNOUNCE_LOC = '{% url "Announce" %}'
+            window.IS_LOGIN = true
         </script>
         <script type="text/javascript" src="{% static 'semantic/newPostModal.js' %}"></script>
         <script type="text/javascript" src="{% static 'webtrigger.js' %}"></script>
+        {% else %}
+        <script type="text/javascript">
+            window.IS_LOGIN = false
+        </script>
         {% endif %}
         {% block script %}{% endblock %}
     </body>

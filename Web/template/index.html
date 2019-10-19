@@ -1,1 +1,71 @@
 {% extends '__head.html' %}
+{% load widget_tweaks %}
+
+{% block body %}
+<div class="ui stackable grid">
+    <div class="four wide column">
+        <div class="ui segment">
+            <h4 class="ui header">
+                {% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}
+                <div class="header sub"><a href="{% url 'UserShow' user.username %}">@{{ user.username }}</a></div>
+            </h4>
+        </div>
+        <div class="ui segment">
+            <form method="POST" action="{% url 'NewPost' %}" id="newPostFormIndex" name="newPostFormIndex" class="ui form" onsubmit="newPostIndex();return false;">
+                {% for field in NewPostForm_ %}
+                    <div class="field">
+                        <label>{{ field.name }}</label>
+                        {{ field|add_class:"enableShortcutKey" }}
+                    </div>
+                {% endfor %}
+                {% csrf_token %}
+                <button type="submit" class="ui button fluid primary" id="postIndexSubmit">投稿</button>
+            </form>
+        </div>
+    </div>
+    <div class="twelve wide column">
+        <p>ここにタイムライン</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+function newPostIndex () {
+    $('#postIndexSubmit').addClass("disabled loading")
+    var postFormValue = $('#newPostFormIndex').serialize()
+    var postTarget = $('#newPostFormIndex').attr('action')
+    $.post(postTarget, postFormValue)
+        .done(function (data) {
+            console.info("Post complete!")
+            console.info(data)
+            $('#newPostFormIndex')[0].reset()
+            $.uiAlert({
+                textHead: '投稿に成功しました。',
+                text: '',
+                bgcolor: '#19c3aa',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'checkmark box',
+                time: 3,
+            })
+        })
+        .fail(function (jqXHR) {
+            var res = JSON.parse(jqXHR.responseText)
+            console.error("Post failed!: " + res.error.msg)
+            $.uiAlert({
+                textHead: '投稿できません。',
+                text: res.error.msg,
+                bgcolor: '#DB2828',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'remove circle',
+                time: 5,
+            })
+        })
+        .always(function () {
+            $('#postIndexSubmit').removeClass("disabled loading")
+        })
+}
+</script>
+{% endblock %}
