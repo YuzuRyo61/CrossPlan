@@ -15,6 +15,8 @@
 {% if user.is_authenticated %}
 <div class="ui buttons">
     <button class="ui button"><i class="reply icon"></i> 返信</button>
+    <button class="ui button blue"><i class="retweet icon"></i> アナウンス</button>
+    <button class="ui button yellow"><i class="star icon"></i> お気に入り</button>
     {% if user == post.parent %}
     <button class="negative ui button" id="deleteButton"><i class="trash icon"></i> 削除</button>
     {% endif %}
