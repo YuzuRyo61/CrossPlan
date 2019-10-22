@@ -95,5 +95,12 @@ class Post(models.Model):
 class Like(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked"),
-    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked")
-    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked")
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+
+class Follow(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers", blank=True, null=True)
+    targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="followers", blank=True, null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="following", blank=True, null=True)

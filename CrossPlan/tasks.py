@@ -5,7 +5,7 @@ import requests
 import markdown
 
 from fediverse.models import Post, User
-from fediverse.lib import sign_header
+from fediverse.lib import sign_header, addDefaultHeader
 
 # resource: https://dot-blog.jp/news/django-async-celery-redis-mac/
 @shared_task
@@ -13,7 +13,8 @@ def APSend(targetUrl, fromUser, dct):
     requests.post(
         targetUrl,
         json=dct,
-        headers=sign_header(fromUser)
+        auth=sign_header(fromUser),
+        headers=addDefaultHeader()
     ).raise_for_status()
     return True
 

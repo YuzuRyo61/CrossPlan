@@ -3,6 +3,8 @@ from datetime import datetime
 from Crypto.PublicKey import RSA
 from Crypto import Random
 
+from requests_http_signature import HTTPSignatureAuth
+
 from httpsig import HeaderSigner
 
 from django.conf import settings
@@ -16,16 +18,15 @@ def generate_key():
 
 def sign_header(username):
     userInfo = models.User.objects.get(username__iexact=username)
-    sign = HeaderSigner(
-        f"https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': userInfo.username})}",
-        bytes(userInfo.privateKey, "UTF-8"),
-        algorithm="rsa-sha256"
-    ).sign({"Date": datetime.now().isoformat()})
-    auth = sign.pop("authorization")
-    sign["Signature"] = auth[len("Signature "):] if auth.startswith("Signature ") else ''
-    return sign
+    return HTTPSignatureAuth(
+        algorithm="rsa-sha256",
+        key=userInfo.privateKey,
+        key_id=f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:publicKey', kwargs={'username': username})}"
+    )
 
-def get_header(username):
-    sign = sign_header(username)
-    sign.update({"Accept": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""})
-    return sign
+def addDefaultHeader(header={}):
+    header.update({
+        "User-Agent": f"CrossPlan/0.0.0 (https://{settings.CP_ENDPOINT}/)",
+        "Content-Type": "application/activity+json"
+    })
+    return header
