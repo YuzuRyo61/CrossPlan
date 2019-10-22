@@ -41,7 +41,8 @@ def User(request, username):
 
 def INDEX(request):
     if request.user.is_authenticated:
-        return render_NPForm(request, 'index.html')
+        timeline = PostModel.objects.all()[0:20] # pylint: disable=no-member
+        return render_NPForm(request, 'index.html', {"timeline": timeline})
     else:
         superusers = UserModel.objects.filter(is_superuser=True) # pylint: disable=no-member
         return render(request, 'landing.html', {"endpoint": settings.CP_ENDPOINT, "superusers": superusers})

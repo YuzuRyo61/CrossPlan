@@ -24,7 +24,31 @@
         </div>
     </div>
     <div class="twelve wide column">
-        <p>ここにタイムライン</p>
+        {% for posts in timeline %}
+        <div class="ui top attached segment" id="{{ posts.uuid }}">
+            <h4 class="ui header">
+                {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
+                <div class="sub header">@{{ posts.parent.username }}</div>
+                <small>{{ posts.posted }}</small>
+            </h4>
+            <div class="post">
+                {{ posts.body|safe }}
+            </div>
+        </div>
+        <div class="ui bottom attached menu">
+            <a class="ui icon item link" href="{% url 'PostDetail' posts.uuid %}" title="詳細を表示">
+                <i class="linkify icon"></i>
+            </a>
+            {% if user.is_authenticated %}
+            <a class="ui icon item link" onclick="announce('{{ posts.uuid }}')" title="アナウンス">
+                <i class="retweet icon"></i>
+            </a>
+            <a class="ui icon item link" onclick="favorite('{{ posts.uuid }}')" title="お気に入り">
+                <i class="star icon"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
