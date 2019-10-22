@@ -20,7 +20,6 @@ def Outbox(request, username):
         if offset <= 0:
             offset = 1
         pagenated = posts[settings.OBJECT_PER_PAGE * (offset - 1):settings.OBJECT_PER_PAGE * offset]
-        print(pagenated)
         output = []
         for post in pagenated:
             output.append(RenderCreate(
