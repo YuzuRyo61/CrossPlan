@@ -38,6 +38,7 @@ def Outbox(request, username):
             RenderOrderedCollectionPage(
                 str(request.get_full_path()),
                 reverse('Fediverse:Outbox', kwargs={"username": target.username}),
+                posts.count(),
                 output,
                 "".join([reverse('Fediverse:Outbox', kwargs={"username": target.username}), '?', urlencode({'page': 'true', 'offset': offset + 1})]) if (posts.count() - settings.OBJECT_PER_PAGE * offset) > 0 else None,
                 "".join([reverse('Fediverse:Outbox', kwargs={"username": target.username}), '?', urlencode({'page': 'true', 'offset': offset - 1})]) if (offset - 1) > 0 else None,

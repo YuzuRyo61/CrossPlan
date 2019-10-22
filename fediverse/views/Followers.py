@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -11,19 +12,34 @@ from fediverse.models import User
 
 def Followers(request, username):
     target = get_object_or_404(User, username__iexact=username)
+    followers = target.followers.all()
     if "page" in request.GET:
+        offset = int(request.GET.get("offset", 1))
+        if offset <= 0:
+            offset = 1
+        pagenated = followers[settings.USER_PER_PAGE * (offset - 1):settings.USER_PER_PAGE * offset]
+        output = []
+        for follower in pagenated:
+            if follower.fromUser != None:
+                output.append(f"https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': follower.fromUser.username})}")
+            elif follower.fromFediUser != None:
+                output.append(follower.fromFediUser.Uri)
+
         return APResponse(APRender(
             RenderOrderedCollectionPage(
-                "".join([reverse('Fediverse:Followers', kwargs={"username": target.username}), '?', urlencode({'page': 'true'})]),
+                str(request.get_full_path()),
                 reverse('Fediverse:Followers', kwargs={"username": target.username}),
-                []
+                followers.count(),
+                output,
+                "".join([reverse('Fediverse:Followers', kwargs={"username": target.username}), '?', urlencode({'page': 'true', 'offset': offset + 1})]) if (followers.count() - settings.USER_PER_PAGE * offset) > 0 else None,
+                "".join([reverse('Fediverse:Followers', kwargs={"username": target.username}), '?', urlencode({'page': 'true', 'offset': offset - 1})]) if (offset - 1) > 0 else None,
             )
         ))
     else:
         return APResponse(APRender(
             RenderOrderedCollection(
                 reverse('Fediverse:Followers', kwargs={"username": target.username}),
-                0,
+                followers.count(),
                 "".join([reverse('Fediverse:Followers', kwargs={"username": target.username}), '?', urlencode({'page': 'true'})])
             )
         ))

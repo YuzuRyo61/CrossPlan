@@ -1,9 +1,10 @@
 from django.conf import settings
 
-def RenderOrderedCollectionPage(idReverse, partOfReverse, orderedItems, nextReverse=None, prevReverse=None):
+def RenderOrderedCollectionPage(idReverse, partOfReverse, totalItems, orderedItems, nextReverse=None, prevReverse=None):
     res = {
         "id": f"https://{settings.CP_ENDPOINT}{idReverse}",
         "type": "OrderedCollectionPage",
+        "totalItems": int(totalItems)
     }
     if nextReverse != None:
         res["next"] = f"https://{settings.CP_ENDPOINT}{nextReverse}"

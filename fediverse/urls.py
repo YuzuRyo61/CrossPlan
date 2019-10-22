@@ -5,6 +5,7 @@ from fediverse.views.Inbox import InboxUser, InboxPublic
 from fediverse.views.Outbox import Outbox
 from fediverse.views.PostActivity import PostActivity
 from fediverse.views.Followers import Followers
+from fediverse.views.Following import Following
 
 app_name = "Fediverse"
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path('user/<username>/inbox', InboxUser, name="Inbox"),
     path('user/<username>/outbox', Outbox, name="Outbox"),
     path('user/<username>/followers', Followers, name="Followers"),
+    path('user/<username>/following', Following, name="Following"),
 ]
