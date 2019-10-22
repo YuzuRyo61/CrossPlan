@@ -76,7 +76,7 @@ class FediverseUser(models.Model):
     Uri = models.URLField(blank=True, null=True)
     Url = models.URLField(blank=True, null=True)
     publicKey = models.TextField(blank=True, null=True)
-    keyId = models.TextField(blank=True, null=True)
+    keyId = models.CharField(max_length=512, blank=True, null=True)
 
     def __str__(self):
         return f"@{self.username}@{self.Host}"

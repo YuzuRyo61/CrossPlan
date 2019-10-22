@@ -40,7 +40,7 @@ def InboxUser(request, username):
     except json.JSONDecodeError:
         return HttpResponseBadRequest()
     
-    print(apbody)
+    pp(apbody)
 
     if not isAPContext(apbody):
         return HttpResponseBadRequest()
@@ -49,13 +49,19 @@ def InboxUser(request, username):
         fromUser = FediverseUser.objects.get(Uri=apbody["actor"]) # pylint: disable=no-member
     except ObjectDoesNotExist:
         fromUser = registerFediUser(apbody["actor"])
-        fromUser.save()
+        if fromUser == False:
+            return HttpResponseBadRequest()
+        else:
+            fromUser.save()
 
     if apbody.get("type") == None or type(apbody.get("type")) != str:
         return HttpResponseBadRequest()
 
     if apbody["type"] == "Follow":
         return _FollowActivity(apbody, fromUser, target)
+    elif apbody["type"] == "Undo":
+        if apbody["object"]["type"] == "Follow":
+            return _FollowActivity(apbody, fromUser, target, True)
 
     return HttpResponse(status=501)
     
@@ -93,8 +99,7 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
             )
         return HttpResponse(status=202)
     else:
-        unFollow = Follow.objests.get(target=targetObj, fromFediUser=fromUserObj) # pylint: disable=no-member
-        unFollow.delete()
+        unFollow = Follow.objects.get(target=targetObj, fromFediUser=fromUserObj) # pylint: disable=no-member
         APSend.delay(
             fromUserObj.Inbox,
             targetObj.username,
@@ -102,10 +107,11 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 targetObj.username,
                 RenderFollow(
                     targetObj.username,
-                    newFollow.uuid,
+                    unFollow.uuid,
                     body["actor"],
                     body["object"]
                 )
             )
         )
+        unFollow.delete()
         return HttpResponse(status=202)

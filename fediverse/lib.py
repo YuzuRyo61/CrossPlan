@@ -25,8 +25,9 @@ def sign_header(username):
     userInfo = models.User.objects.get(username__iexact=username)
     return HTTPSignatureAuth(
         algorithm="rsa-sha256",
-        key=userInfo.privateKey,
-        key_id=f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:publicKey', kwargs={'username': username})}"
+        key=bytes(userInfo.privateKey, 'UTF-8'),
+        headers=["(request-target)", "host", "date"],
+        key_id=f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:publicKey', kwargs={'username': userInfo.username})}"
     )
 
 def addDefaultHeader(header={}):
@@ -48,9 +49,6 @@ def isAPContext(apbody):
         else:
             return False
     else:
-        return False
-
-    if apbody.get("actor") == None or type(apbody.get("actor")) != str:
         return False
     
     return True

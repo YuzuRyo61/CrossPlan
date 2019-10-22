@@ -10,6 +10,7 @@ from fediverse.lib import sign_header, addDefaultHeader
 # resource: https://dot-blog.jp/news/django-async-celery-redis-mac/
 @shared_task
 def APSend(targetUrl, fromUser, dct):
+    print(f"APSEND => {targetUrl}")
     requests.post(
         targetUrl,
         json=dct,
