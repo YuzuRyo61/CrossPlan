@@ -133,3 +133,4 @@ venv/
 
 # environment file (deployment)
 .env
+.vscode/settings.json
