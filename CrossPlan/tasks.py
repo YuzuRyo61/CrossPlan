@@ -3,6 +3,7 @@ from celery import shared_task
 from urllib.parse import urlparse
 import requests
 import markdown
+import logging
 
 from fediverse.models import Post, User
 from fediverse.lib import sign_header, addDefaultHeader
@@ -10,7 +11,7 @@ from fediverse.lib import sign_header, addDefaultHeader
 # resource: https://dot-blog.jp/news/django-async-celery-redis-mac/
 @shared_task
 def APSend(targetUrl, fromUser, dct):
-    print(f"APSEND => {targetUrl}")
+    logging.info(f"APSEND => {targetUrl}")
     requests.post(
         targetUrl,
         json=dct,
