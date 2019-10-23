@@ -1,15 +1,22 @@
 {% extends '__head.html' %}
 
-{% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}
+{% block title %}{% if isFediverseUser %}🌏 {% endif %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}
 
 {% block body %}
 <h1 class="ui header">
     {% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}
-    <div class="sub header">@{{ targetUser.username }}</div>
+    <div class="sub header">@{{ targetUser.username }}{% if isFediverseUser %}@{{ targetUser.Host }}{% endif %}</div>
 </h1>
 <hr>
 <div class="ui stackable grid">
     <div class="four wide column">
+        {% if isFediverseUser %}
+        <div class="ui warning message">
+            <div class="header">このユーザーは連合ユーザーです。</div>
+            <p>このユーザーは連合ユーザーであり、最新のプロフィールでない可能性があります。</p>
+            <a href="{{ targetUser.Url }}">連合先のユーザーのプロフィールを見る</a>
+        </div>
+        {% endif %}
         <div class="ui segment">
             <div>
                 {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
@@ -21,26 +28,28 @@
                     <em>説明なし</em>
                 {% endif %}
             </div>
+            {% if not isFediverseUser %}
             <hr>
             <p>{{ targetUser.registered }} 登録</p>
+            {% endif %}
         </div>
         <div class="ui segment">
             <div class="ui relaxed divided list">
                 <div class="item">
                     <div class="content">
-                        <a class="header" href="{% url 'UserShow' targetUser.username %}">投稿</a>
+                        <a class="header" href="{% if isFediverseUser %}{% else %}{% url 'UserShow' targetUser.username %}{% endif %}">投稿</a>
                         <div class="description">{{ targetUser.posts.all.count }}</div>
                     </div>
                 </div>
                 <div class="item">
                     <div class="content">
-                        <a class="header" href="{% url 'UserShowFollowing' targetUser.username %}">フォロー</a>
+                        <a class="header" href="{% if isFediverseUser %}{% else %}{% url 'UserShowFollowing' targetUser.username %}{% endif %}">フォロー</a>
                         <div class="description">{{ targetUser.following.all.count }}</div>
                     </div>
                 </div>
                 <div class="item">
                     <div class="content">
-                        <a class="header" href="{% url 'UserShowFollower' targetUser.username %}">フォロワー</a>
+                        <a class="header" href="{% if isFediverseUser %}{% else %}{% url 'UserShowFollower' targetUser.username %}{% endif %}">フォロワー</a>
                         <div class="description">{{ targetUser.followers.all.count }}</div>
                     </div>
                 </div>

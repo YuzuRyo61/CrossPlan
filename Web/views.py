@@ -3,15 +3,16 @@ import html2markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 
 from CrossPlan.tasks import NewPost as NewPostTask
 
-from fediverse.models import User as UserModel, Post as PostModel
+from fediverse.models import User as UserModel, Post as PostModel, FediverseUser
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
@@ -62,6 +63,19 @@ def INDEX(request):
     else:
         superusers = UserModel.objects.filter(is_superuser=True) # pylint: disable=no-member
         return render(request, 'landing.html', {"endpoint": settings.CP_ENDPOINT, "superusers": superusers})
+
+def FediUser(request, username, host):
+    try:
+        targetUser = FediverseUser.objects.get(username__iexact=username, Host__iexact=host) # pylint: disable=no-member
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+    
+    renderObj = {
+        "targetUser": targetUser,
+        "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE),
+        "isFediverseUser": True
+    }
+    return render_NPForm(request, "profile.html", renderObj)
 
 @login_required
 def newPost(request):

@@ -3,8 +3,24 @@
 {% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}のフォロワーリスト | CrossPlan{% endblock %}
 
 {% block side %}
-    {% for posts in targetUserFollower %}
-    {# following loop #}
+    {% for follower in targetUserFollower %}
+    {% if follower.fromUser %}
+    <div class="ui segment">
+        <h3 class="ui header">
+            {% if follower.fromUser.display_name %}{{ follower.fromUser.display_name }}{% else %}{{ follower.fromUser.username }}{% endif %}
+            <div class="header sub"><a href="{% url 'UserShow' follower.fromUser.username %}">@{{ follower.fromUser.username }}</a></div>
+        </h3>
+        {{ follower.fromUser.description|safe }}
+    </div>
+    {% elif follower.fromFediUser %}
+    <div class="ui segment">
+        <h3 class="ui header">
+            {% if follower.fromFediUser.display_name %}{{ follower.fromFediUser.display_name }}{% else %}{{ follower.fromFediUser.username }}{% endif %}
+            <div class="header sub"><a href="{% url 'FediUserShow' follower.fromFediUser.username follower.fromFediUser.Host %}">@{{ follower.fromFediUser.username }}@{{ follower.fromFediUser.Host }}</a></div>
+        </h3>
+        {{ follower.fromFediUser.description|safe }}
+    </div>
+    {% endif %}
     {% if forloop.last %}
     <div class="ui centered grid">
         <div class="center aligned column">

@@ -77,7 +77,7 @@ def registerFediUser(uri):
 
         return models.FediverseUser(
             username=res["preferredUsername"],
-            name=res.get("name"),
+            display_name=res.get("name"),
             description=res.get("summary"),
             Host=host,
             Inbox=res["inbox"],

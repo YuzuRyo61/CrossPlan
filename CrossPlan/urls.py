@@ -38,4 +38,5 @@ urlpatterns = [
     path('settings/profile', WebViews.settings_profile, name="Settings_Profile"),
     path('settings/password', WebViews.settings_Password.as_view(), name="Settings_Password"),
     path('settings/password/done', WebViews.settings_PasswordDone.as_view(), name="Settings_PasswordDone"),    
+    path('fediuser/<username>@<host>', WebViews.FediUser, name="FediUserShow")
 ]
