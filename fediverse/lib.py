@@ -8,7 +8,7 @@ import requests
 
 from urllib.parse import urlparse
 
-from requests_http_signature import HTTPSignatureAuth
+from requests_http_signature import HTTPSignatureHeaderAuth
 
 from httpsig import HeaderSigner
 
@@ -23,7 +23,7 @@ def generate_key():
 
 def sign_header(username):
     userInfo = models.User.objects.get(username__iexact=username)
-    return HTTPSignatureAuth(
+    return HTTPSignatureHeaderAuth(
         algorithm="rsa-sha256",
         key=bytes(userInfo.privateKey, 'UTF-8'),
         headers=["(request-target)", "host", "date"],
