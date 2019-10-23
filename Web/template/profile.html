@@ -1,115 +1,66 @@
-{% extends '__head.html' %}
+{% extends '__profile_head.html' %}
 
-{% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}
-
-{% block body %}
-<h1 class="ui header">
-    {% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}
-    <div class="sub header">@{{ targetUser.username }}</div>
-</h1>
-<hr>
-<div class="ui stackable grid">
-    <div class="four wide column">
-        <div class="ui segment">
-            <div>
-                {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
-            </div>
-            <div>
-                {% if targetUser.description %}
-                    {{ targetUser.description|safe }}
+{% block side %}
+    {% for posts in targetUserPosts %}
+    <div class="ui top attached segment" id="{{ posts.uuid }}">
+        <h4 class="ui header">
+            {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
+            <div class="sub header">@{{ posts.parent.username }}</div>
+            <small>{{ posts.posted }}</small>
+        </h4>
+        <div class="post">
+            {{ posts.body|safe }}
+        </div>
+    </div>
+    <div class="ui bottom attached menu">
+        <a class="ui icon item link" href="{% url 'PostDetail' posts.uuid %}" title="詳細を表示">
+            <i class="linkify icon"></i>
+        </a>
+        {% if user.is_authenticated %}
+        <a class="ui icon item link" onclick="announce('{{ posts.uuid }}', this)" title="アナウンス">
+            <i class="retweet icon"></i>
+        </a>
+        <a class="ui icon item link" onclick="favorite('{{ posts.uuid }}', this)" title="お気に入り">
+            <i class="star icon"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% if forloop.last %}
+    <div class="ui centered grid">
+        <div class="center aligned column">
+            <div class="ui pagination menu">
+                {% if targetUserPosts.has_previous %}
+                <a class="item" href="?page={{ targetUserPosts.previous_page_number }}">前へ</a>
                 {% else %}
-                    <em>説明なし</em>
+                <div class="disabled item">前へ</div>
+                {% endif %}
+                {% for link_page in targetUserPosts.paginator.page_range %}
+                    {% if link_page %}
+                        {% if link_page == targetUserPosts.number %}
+                        <a class="active item" href="#">{{ link_page }}</a>
+                        {% else %}
+                        <a class="active item" href="?page={{ link_page }}">{{ link_page }}</a>
+                        {% endif %}
+                    {% else %}
+                    <div class="disabled item">...</div>
+                    {% endif %}
+                {% endfor %}
+                {% if targetUserPosts.has_next %}
+                <a class="item" href="?page={{ targetUserPosts.next_page_number }}">次へ</a>
+                {% else %}
+                <div class="disabled item">次へ</div>
                 {% endif %}
             </div>
-            <hr>
-            <p>{{ targetUser.registered }} 登録</p>
-        </div>
-        <div class="ui segment">
-            <div class="ui relaxed divided list">
-                <div class="item">
-                    <div class="content">
-                        <a class="header" href="{% url 'UserShow' targetUser.username %}">投稿</a>
-                        <div class="description">{{ targetUser.posts.all.count }}</div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <a class="header">フォロー</a>
-                        <div class="description">{{ targetUser.following.all.count }}</div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <a class="header">フォロワー</a>
-                        <div class="description">{{ targetUser.followers.all.count }}</div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-    <div class="twelve wide column">
-        {% for posts in targetUserPosts %}
-        <div class="ui top attached segment" id="{{ posts.uuid }}">
-            <h4 class="ui header">
-                {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
-                <div class="sub header">@{{ posts.parent.username }}</div>
-                <small>{{ posts.posted }}</small>
-            </h4>
-            <div class="post">
-                {{ posts.body|safe }}
-            </div>
+    {% endif %}
+    {% empty %}
+    <div class="ui icon message">
+        <i class="inbox icon"></i>
+        <div class="content">
+            <div class="header">投稿がありません。</div>
+            <p>投稿がないか、非公開の投稿のみのどちらかでしょう。</p>
         </div>
-        <div class="ui bottom attached menu">
-            <a class="ui icon item link" href="{% url 'PostDetail' posts.uuid %}" title="詳細を表示">
-                <i class="linkify icon"></i>
-            </a>
-            {% if user.is_authenticated %}
-            <a class="ui icon item link" onclick="announce('{{ posts.uuid }}')" title="アナウンス">
-                <i class="retweet icon"></i>
-            </a>
-            <a class="ui icon item link" onclick="favorite('{{ posts.uuid }}')" title="お気に入り">
-                <i class="star icon"></i>
-            </a>
-            {% endif %}
-        </div>
-        {% if forloop.last %}
-        <div class="ui centered grid">
-            <div class="center aligned column">
-                <div class="ui pagination menu">
-                    {% if targetUserPosts.has_previous %}
-                    <a class="item" href="?page={{ targetUserPosts.previous_page_number }}">前へ</a>
-                    {% else %}
-                    <div class="disabled item">前へ</div>
-                    {% endif %}
-                    {% for link_page in targetUserPosts.paginator.page_range %}
-                        {% if link_page %}
-                            {% if link_page == targetUserPosts.number %}
-                            <a class="active item" href="#">{{ link_page }}</a>
-                            {% else %}
-                            <a class="active item" href="?page={{ link_page }}">{{ link_page }}</a>
-                            {% endif %}
-                        {% else %}
-                        <div class="disabled item">...</div>
-                        {% endif %}
-                    {% endfor %}
-                    {% if targetUserPosts.has_next %}
-                    <a class="item" href="?page={{ targetUserPosts.next_page_number }}">次へ</a>
-                    {% else %}
-                    <div class="disabled item">次へ</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        {% empty %}
-        <div class="ui icon message">
-            <i class="inbox icon"></i>
-            <div class="content">
-                <div class="header">投稿がありません。</div>
-                <p>投稿がないか、非公開の投稿のみのどちらかでしょう。</p>
-            </div>
-        </div>
-        {% endfor %}
     </div>
-</div>
+    {% endfor %}
 {% endblock %}

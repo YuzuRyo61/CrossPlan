@@ -39,6 +39,22 @@ def User(request, username):
         renderTarget = "profile.html"
         return render_NPForm(request, renderTarget, renderObj)
 
+def UserFollowing(request, username):
+    targetUser = get_object_or_404(UserModel, username__iexact=username)
+    renderObj = {
+        "targetUser": targetUser,
+        "targetUserFollowing": panigateQuery(request, targetUser.following.all(), settings.USER_PER_PAGE)
+    }
+    return render_NPForm(request, "profile_following.html", renderObj)
+
+def UserFollower(request, username):
+    targetUser = get_object_or_404(UserModel, username__iexact=username)
+    renderObj = {
+        "targetUser": targetUser,
+        "targetUserFollower": panigateQuery(request, targetUser.followers.all(), settings.USER_PER_PAGE)
+    }
+    return render_NPForm(request, "profile_follower.html", renderObj)
+
 def INDEX(request):
     if request.user.is_authenticated:
         timeline = PostModel.objects.all()[0:20] # pylint: disable=no-member

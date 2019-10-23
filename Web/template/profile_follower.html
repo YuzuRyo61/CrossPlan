@@ -1,0 +1,46 @@
+{% extends '__profile_head.html' %}
+
+{% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}のフォロワーリスト | CrossPlan{% endblock %}
+
+{% block side %}
+    {% for posts in targetUserFollower %}
+    {# following loop #}
+    {% if forloop.last %}
+    <div class="ui centered grid">
+        <div class="center aligned column">
+            <div class="ui pagination menu">
+                {% if targetUserFollower.has_previous %}
+                <a class="item" href="?page={{ targetUserFollower.previous_page_number }}">前へ</a>
+                {% else %}
+                <div class="disabled item">前へ</div>
+                {% endif %}
+                {% for link_page in targetUserFollower.paginator.page_range %}
+                    {% if link_page %}
+                        {% if link_page == targetUserFollower.number %}
+                        <a class="active item" href="#">{{ link_page }}</a>
+                        {% else %}
+                        <a class="active item" href="?page={{ link_page }}">{{ link_page }}</a>
+                        {% endif %}
+                    {% else %}
+                    <div class="disabled item">...</div>
+                    {% endif %}
+                {% endfor %}
+                {% if targetUserFollower.has_next %}
+                <a class="item" href="?page={{ targetUserFollower.next_page_number }}">次へ</a>
+                {% else %}
+                <div class="disabled item">次へ</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% empty %}
+    <div class="ui icon message">
+        <i class="user icon"></i>
+        <div class="content">
+            <div class="header">フォロワーなし</div>
+            <p>まだフォロワーがいません。</p>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

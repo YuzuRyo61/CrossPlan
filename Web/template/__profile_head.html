@@ -1,0 +1,54 @@
+{% extends '__head.html' %}
+
+{% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}
+
+{% block body %}
+<h1 class="ui header">
+    {% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}
+    <div class="sub header">@{{ targetUser.username }}</div>
+</h1>
+<hr>
+<div class="ui stackable grid">
+    <div class="four wide column">
+        <div class="ui segment">
+            <div>
+                {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
+            </div>
+            <div>
+                {% if targetUser.description %}
+                    {{ targetUser.description|safe }}
+                {% else %}
+                    <em>説明なし</em>
+                {% endif %}
+            </div>
+            <hr>
+            <p>{{ targetUser.registered }} 登録</p>
+        </div>
+        <div class="ui segment">
+            <div class="ui relaxed divided list">
+                <div class="item">
+                    <div class="content">
+                        <a class="header" href="{% url 'UserShow' targetUser.username %}">投稿</a>
+                        <div class="description">{{ targetUser.posts.all.count }}</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <a class="header" href="{% url 'UserShowFollowing' targetUser.username %}">フォロー</a>
+                        <div class="description">{{ targetUser.following.all.count }}</div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <a class="header" href="{% url 'UserShowFollower' targetUser.username %}">フォロワー</a>
+                        <div class="description">{{ targetUser.followers.all.count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="twelve wide column">
+        {% block side %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

@@ -26,6 +26,8 @@ urlpatterns = [
     path('.well-known/webfinger', WebFinger_res),
     path('AP/', include('fediverse.urls')),
     path('user/<username>', WebViews.User, name="UserShow"),
+    path('user/<username>/following', WebViews.UserFollowing, name="UserShowFollowing"),
+    path('user/<username>/follower', WebViews.UserFollower, name="UserShowFollower"),
     path('login', WebViews.LoginView.as_view(), name="Login"),
     path('logout', WebViews.LogoutView.as_view(), name="Logout"),
     path('_NEWPOST', WebViews.newPost, name="NewPost"),
