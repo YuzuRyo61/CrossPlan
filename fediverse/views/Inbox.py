@@ -99,19 +99,35 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
             )
         return HttpResponse(status=202)
     else:
-        unFollow = Follow.objects.get(target=targetObj, fromFediUser=fromUserObj) # pylint: disable=no-member
-        APSend.delay(
-            fromUserObj.Inbox,
-            targetObj.username,
-            RenderUndo(
+        try:
+            unFollow = Follow.objects.get(target=targetObj, fromFediUser=fromUserObj) # pylint: disable=no-member
+        except ObjectDoesNotExist:
+            APSend.delay(
+                fromUserObj.Inbox,
                 targetObj.username,
-                RenderFollow(
+                RenderUndo(
                     targetObj.username,
-                    unFollow.uuid,
-                    body["actor"],
-                    body["object"]
+                    RenderFollow(
+                        targetObj.username,
+                        "null",
+                        body["actor"],
+                        body["object"]
+                    )
                 )
             )
-        )
-        unFollow.delete()
+        else:
+            APSend.delay(
+                fromUserObj.Inbox,
+                targetObj.username,
+                RenderUndo(
+                    targetObj.username,
+                    RenderFollow(
+                        targetObj.username,
+                        unFollow.uuid,
+                        body["actor"],
+                        body["object"]
+                    )
+                )
+            )
+            unFollow.delete()
         return HttpResponse(status=202)
