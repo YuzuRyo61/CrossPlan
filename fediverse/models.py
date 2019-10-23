@@ -83,11 +83,12 @@ class FediverseUser(models.Model):
 
 class Post(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    fediID = models.CharField(max_length=256, blank=True, null=True)
     body = models.TextField(blank=True, null=True)
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
     parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
-    announceTo = models.TextField(blank=True, null=True)
-    replyTo = models.TextField(blank=True, null=True)
+    announceTo = models.CharField(max_length=64, blank=True, null=True)
+    replyTo = models.CharField(max_length=64, blank=True, null=True)
     posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:
