@@ -7,11 +7,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from CrossPlan.tasks import APSend
 
-from fediverse.views.renderer.response import APResponse
-from fediverse.views.renderer.head import APRender
-from fediverse.views.renderer.activity.Undo import RenderUndo
-from fediverse.views.renderer.activity.Accept import RenderAccept
-from fediverse.views.renderer.activity.Follow import RenderFollow
+from fediverse.views.inboxProcess.Follow import _FollowActivity
+from fediverse.views.inboxProcess.Like import _LikeActivity
 
 from fediverse.models import User, FediverseUser, Follow
 
@@ -59,6 +56,8 @@ def InboxUser(request, username):
 
     if apbody["type"] == "Follow":
         return _FollowActivity(apbody, fromUser, target)
+    elif apbody["type"] == "Like":
+        return _LikeActivity(apbody, fromUser, target)
     elif apbody["type"] == "Undo":
         if apbody["object"]["type"] == "Follow":
             return _FollowActivity(apbody, fromUser, target, True)
@@ -72,62 +71,3 @@ def InboxPublic(request):
     pass
     
     # to-do: Inbox methods
-
-def _FollowActivity(body, fromUserObj, targetObj, undo=False):
-    if not undo:
-        if Follow.objects.filter(target=targetObj, fromFediUser=fromUserObj).count() != 0: # pylint: disable=no-member
-            # to-do: reject
-            pass
-        else:
-            newFollow = Follow(
-                target=targetObj,
-                fromFediUser=fromUserObj
-            )
-            newFollow.save()
-            APSend.delay(
-                fromUserObj.Inbox,
-                targetObj.username,
-                RenderAccept(
-                    targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        newFollow.uuid,
-                        body["actor"],
-                        body["object"]
-                    )
-                )
-            )
-        return HttpResponse(status=202)
-    else:
-        try:
-            unFollow = Follow.objects.get(target=targetObj, fromFediUser=fromUserObj) # pylint: disable=no-member
-        except ObjectDoesNotExist:
-            APSend.delay(
-                fromUserObj.Inbox,
-                targetObj.username,
-                RenderUndo(
-                    targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        "null",
-                        body["actor"],
-                        body["object"]
-                    )
-                )
-            )
-        else:
-            APSend.delay(
-                fromUserObj.Inbox,
-                targetObj.username,
-                RenderUndo(
-                    targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        unFollow.uuid,
-                        body["actor"],
-                        body["object"]
-                    )
-                )
-            )
-            unFollow.delete()
-        return HttpResponse(status=202)
