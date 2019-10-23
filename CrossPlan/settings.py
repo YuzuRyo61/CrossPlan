@@ -31,7 +31,6 @@ DEBUG = True if os.environ.get('CP_ENV', 'development') == 'development' else Fa
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "192.168.1.18",
     os.environ.get('CP_ENDPOINT', 'localhost')
 ]
 
