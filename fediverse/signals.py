@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.urls import reverse
 from django.db.models.signals import post_save, pre_delete
@@ -17,7 +19,7 @@ from pprint import pprint as pp
 @receiver(post_save, sender=Post)
 def savePostSignal(sender, instance, created, **kwargs):
     if created and instance.parent != None:
-        print(f"SEND [CREATE] => {str(instance.uuid)}")
+        logging.info(f"SEND [CREATE] => {str(instance.uuid)}")
         for followers in instance.parent.followers.all():
             if followers.fromFediUser != None:
                 APSend.delay(
