@@ -64,9 +64,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 class FediverseUser(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=64)
-    name = models.CharField(max_length=128, blank=True, null=True)
+    display_name = models.CharField(max_length=128, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     Host = models.URLField()
+    is_bot = models.BooleanField(default=False)
     Inbox = models.URLField(blank=True, null=True)
     Outbox = models.URLField(blank=True, null=True)
     SharedInbox = models.URLField(blank=True, null=True)
