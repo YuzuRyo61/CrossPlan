@@ -83,7 +83,7 @@ def newPost(request):
         return HttpResponseNotAllowed("POST")
 
     if NewPostForm(request.POST).is_valid():
-        NewPostTask(request.user.username, request.POST)
+        NewPostTask.delay(request.user.username, request.POST)
     else:
         return HttpResponseBadRequest(json.dumps({"error": {
             "code": "DO_NOT_EMPTY",
