@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import socket
+import logging
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -27,6 +28,9 @@ SECRET_KEY = os.environ.get('CP_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get('CP_ENV', 'development') == 'development' else False
+
+if os.environ.get('CP_ENV', 'development') == 'development':
+    logging.basicConfig(level=logging.DEBUG)
 
 ALLOWED_HOSTS = [
     "localhost",
