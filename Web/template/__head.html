@@ -1,6 +1,5 @@
 {% load static %}
 {% load widget_tweaks %}
-{% load compress %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -9,9 +8,10 @@
 
         <title>{% block title %}CrossPlan{% endblock %}</title>
 
-        {% compress css %}
         <link rel="stylesheet" href="{% static 'semantic/semantic.min.css' %}">
         <link rel="stylesheet" href="{% static 'semantic/Semantic-UI-Alert.css' %}">
+
+        {% block head %}{% endblock %}
 
         <style>
             .ui.header .emoji {
@@ -28,8 +28,6 @@
             }
         </style>
         {% block style %}{% endblock %}
-        {% endcompress %}
-        {% block head %}{% endblock %}
     </head>
     <body>
         <div class="ui top fixed menu">
@@ -83,14 +81,18 @@
                 </div>
         </div>
         {% endif %}
-        <script src="https://twemoji.maxcdn.com/v/12.1.3/twemoji.min.js" integrity="sha384-PEQg4NJbyXT+TJJVKYN9zmD5ehVaV3TiBdzovT7WkshNClGNg8+bk4hKQ+lGrgaw" crossorigin="anonymous"></script>
-        {% compress js %}
         <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/semantic.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'semantic/Semantic-UI-Alert.js' %}"></script>
+        <script src="https://twemoji.maxcdn.com/v/12.1.3/twemoji.min.js" integrity="sha384-PEQg4NJbyXT+TJJVKYN9zmD5ehVaV3TiBdzovT7WkshNClGNg8+bk4hKQ+lGrgaw" crossorigin="anonymous"></script>
         <script type="text/javascript">twemoji.parse(document.body)</script>
         <script type="text/javascript" src="{% static 'semantic/runDropdown.js' %}"></script>
         <script type="text/javascript" src="{% static 'shortcutKey.js' %}"></script>
+        {% if user.is_authenticated %}
+        <script type="text/javascript" src="{% static 'semantic/newPostModal.js' %}"></script>
+        <script type="text/javascript" src="{% static 'webtrigger.js' %}"></script>
+        {% endif %}
+        {% block script %}{% endblock %}
         {% if user.is_authenticated %}
         <script type="text/javascript">
             window.isNewPostModalActive = false
@@ -99,14 +101,10 @@
             window.ANNOUNCE_LOC = '{% url "Announce" %}'
             window.IS_LOGIN = true
         </script>
-        <script type="text/javascript" src="{% static 'semantic/newPostModal.js' %}"></script>
-        <script type="text/javascript" src="{% static 'webtrigger.js' %}"></script>
         {% else %}
         <script type="text/javascript">
             window.IS_LOGIN = false
         </script>
         {% endif %}
-        {% block script %}{% endblock %}
-        {% endcompress %}
     </body>
 </html>
