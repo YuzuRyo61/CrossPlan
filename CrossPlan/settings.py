@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'widget_tweaks',
     'channels',
+    'django_admin_listfilter_dropdown',
     # Projects
     'fediverse',
     'Web'
