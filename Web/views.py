@@ -12,7 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from CrossPlan.tasks import NewPost as NewPostTask
 
-from fediverse.models import User as UserModel, Post as PostModel, FediverseUser
+from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
@@ -99,6 +99,56 @@ def announce(request):
 @login_required
 def favorite(request):
     pass
+
+@login_required
+def userState(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed("POST")
+
+    state = request.POST.get("changeState")
+    if state == None:
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "INVALID_FORM",
+            "msg": "changeStateに値がありません"
+        }}))
+    
+    if state == "follow":
+        if request.POST.get("target") != None:
+            try:
+                existFollow = FollowModel.objects.get(fromUser=request.user, target=User.objects.get(username__iexact=request.POST["target"])) # pylint: disable=no-member
+                existFollow.delete()
+                isNewFollow = False
+            except ObjectDoesNotExist:
+                newFollow = FollowModel(
+                    fromUser=request.user,
+                    target=get_object_or_404(User, username__iexact=request.POST["target"])
+                )
+                isNewFollow = True
+        elif request.POST.get("targetFedi") != None:
+            try:
+                existFollow = FollowModel.objects.get(fromUser=request.user, targetFedi=FediverseUser.objects.get(uuid=request.POST["targetFedi"])) # pylint: disable=no-member
+                existFollow.delete()
+                isNewFollow = False
+            except ObjectDoesNotExist:
+                newFollow = FollowModel(
+                    fromUser=request.user,
+                    targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])
+                )
+                isNewFollow = True
+        else:
+            return HttpResponseBadRequest(json.dumps({"error": {
+                "code": "INVALID_FORM",
+                "msg": "ターゲットが不明です"
+            }}))
+        
+        if isNewFollow:
+            newFollow.save()
+        return HttpResponse(status=202)
+
+    return HttpResponse(json.dumps({"error": {
+        "code": "NOT_IMPLEMENTED",
+        "msg": "実装中"
+    }}), content_type="application/json", status=501)
 
 @login_required
 def postDelete(request):

@@ -7,10 +7,12 @@ from django.dispatch import receiver
 
 from CrossPlan.tasks import APSend
 
-from .models import Post, Like
+from .models import Post, Like, Follow
 from .views.renderer.head import APRender
 from .views.renderer.activity.Create import RenderCreate
 from .views.renderer.activity.Delete import RenderDelete
+from .views.renderer.activity.Follow import RenderFollow
+from .views.renderer.activity.Undo import RenderUndo
 from .views.renderer.object.Note import RenderNote
 from .views.renderer.object.Tombstone import RenderTombstone
 
@@ -57,3 +59,34 @@ def preDeletePostSignal(sender, instance, using, **kwargs):
                         RenderTombstone(instance.uuid)
                     ))
                 )
+
+@receiver(post_save, sender=Follow)
+def postFollow(sender, instance, created, **kwargs):
+    if created and instance.targetFedi != None and instance.fromUser != None:
+        APSend.delay(
+            instance.targetFedi.Inbox,
+            instance.fromUser.username,
+            APRender(RenderFollow(
+                instance.fromUser.username,
+                instance.uuid,
+                f"https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': instance.fromUser.username})}",
+                instance.targetFedi.Uri
+            ))
+        )
+
+@receiver(pre_delete, sender=Follow)
+def preUnFollow(sender, instance, using, **kwargs):
+    if instance.targetFedi != None:
+        APSend.delay(
+            instance.targetFedi.Inbox,
+            instance.fromUser.username,
+            APRender(RenderUndo(
+                instance.fromUser.username,
+                RenderFollow(
+                    instance.fromUser.username,
+                    instance.uuid,
+                    f"https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': instance.fromUser.username})}",
+                    instance.targetFedi.Uri
+                )
+            ))
+        )

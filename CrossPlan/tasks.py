@@ -12,13 +12,14 @@ from fediverse.lib import sign_header, addDefaultHeader
 @shared_task
 def APSend(targetUrl, fromUser, dct):
     logging.info(f"APSEND => {targetUrl}")
-    requests.post(
+    res = requests.post(
         targetUrl,
         json=dct,
         auth=sign_header(fromUser),
         headers=addDefaultHeader()
-    ).raise_for_status()
-    return True
+    )
+    res.raise_for_status()
+    return f"Accepted: {res.status_code}"
 
 @shared_task
 def NewPost(fromUser, post_content):

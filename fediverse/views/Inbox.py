@@ -1,3 +1,4 @@
+import logging
 import json
 
 from django.shortcuts import get_object_or_404
@@ -58,6 +59,9 @@ def InboxUser(request, username):
         return _FollowActivity(apbody, fromUser, target)
     elif apbody["type"] == "Like":
         return _LikeActivity(apbody, fromUser, target)
+    elif apbody["type"] == "Accept":
+        logging.info("Activity was accepted")
+        return HttpResponse(status=202)
     elif apbody["type"] == "Undo":
         if apbody["object"]["type"] == "Follow":
             return _FollowActivity(apbody, fromUser, target, True)
