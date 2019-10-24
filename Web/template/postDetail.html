@@ -4,8 +4,18 @@
 
 {% block body %}
 <h1 class="ui header">
+    {% if post.parent %}
     {% if post.parent.display_name %}{{ post.parent.display_name }}{% else %}{{ post.parent.username }}{% endif %}
-    <div class="sub header"><a href="{% url 'UserShow' post.parent.username %}">@{{ post.parent.username }}</a></div>
+    {% elif post.parentFedi %}
+    {% if post.parentFedi.display_name %}{{ post.parentFedi.display_name }}{% else %}{{ post.parentFedi.username }}{% endif %}
+    {% endif %}
+    <div class="sub header">
+        {% if post.parent %}
+        <a href="{% url 'UserShow' post.parent.username %}">@{{ post.parent.username }}</a>
+        {% elif post.parentFedi %}
+        <a href="{% url 'FediUserShow' post.parentFedi.username post.parentFedi.Host %}">@{{ post.parentFedi.username }}@{{ post.parentFedi.Host }}</a>
+        {% endif %}
+    </div>
 </h1>
 <div class="post">
     {{ post.body|safe }}

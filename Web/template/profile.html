@@ -4,8 +4,17 @@
     {% for posts in targetUserPosts %}
     <div class="ui top attached segment" id="{{ posts.uuid }}">
         <h4 class="ui header">
-            {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
-            <div class="sub header">@{{ posts.parent.username }}</div>
+            {% if posts.parent %}
+            {% elif posts.parentFedi %}
+            {% if posts.parentFedi.display_name %}{{ posts.parentFedi.display_name }}{% else %}{{ posts.parentFedi.username }}{% endif %}
+            {% endif %}
+            <div class="sub header">
+                {% if posts.parent %}
+                @{{ posts.parent.username }}
+                {% elif posts.parentFedi %}
+                @{{ posts.parentFedi.username }}@{{ posts.parentFedi.Host }}
+                {% endif %}
+            </div>
             <small>{{ posts.posted }}</small>
         </h4>
         <div class="post">
