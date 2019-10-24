@@ -17,6 +17,20 @@
             <a href="{{ targetUser.Url }}">連合先のユーザーのプロフィールを見る</a>
         </div>
         {% endif %}
+        {% if targetUser == user %}
+        <a class="ui button fluid" href="{% url 'Settings_Profile' %}">プロフィールを編集</a>
+        {% else %}
+        <div class="ui teal buttons">
+            <div class="ui button fluid">フォロー</div>
+            <div class="ui floating dropdown icon button">
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item"><i class="mute icon"></i> ミュート</div>
+                    <div class="item"><i class="ban icon"></i> ブロック</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <div class="ui segment">
             <div>
                 {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
