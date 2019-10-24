@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.conf import settings
 
 from fediverse.views.renderer.response import APResponse
 from fediverse.views.renderer.head import APRender

@@ -3,7 +3,7 @@ import html2markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, HttpResponseGone
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
@@ -33,6 +33,8 @@ def User(request, username):
         return APResponse(APRender(RenderUser(username)))
     else:
         targetUser = get_object_or_404(UserModel, username__iexact=username)
+        if targetUser.is_active == False:
+            return HttpResponseGone()
         renderObj = {
             "targetUser": targetUser,
             "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE)
@@ -42,6 +44,8 @@ def User(request, username):
 
 def UserFollowing(request, username):
     targetUser = get_object_or_404(UserModel, username__iexact=username)
+    if targetUser.is_active == False:
+        return HttpResponseGone()
     renderObj = {
         "targetUser": targetUser,
         "targetUserFollowing": panigateQuery(request, targetUser.following.all(), settings.USER_PER_PAGE)
@@ -50,6 +54,8 @@ def UserFollowing(request, username):
 
 def UserFollower(request, username):
     targetUser = get_object_or_404(UserModel, username__iexact=username)
+    if targetUser.is_active == False:
+        return HttpResponseGone()
     renderObj = {
         "targetUser": targetUser,
         "targetUserFollower": panigateQuery(request, targetUser.followers.all(), settings.USER_PER_PAGE)

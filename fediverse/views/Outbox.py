@@ -2,6 +2,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
+from django.http.response import HttpResponseGone
 
 from fediverse.views.renderer.response import APResponse
 from fediverse.views.renderer.activity.Create import RenderCreate
@@ -14,6 +15,8 @@ from fediverse.models import User
 
 def Outbox(request, username):
     target = get_object_or_404(User, username__iexact=username)
+    if target.is_active == False:
+        return HttpResponseGone()
     posts = target.posts.all()
     if "page" in request.GET:
         offset = int(request.GET.get("offset", 1))
