@@ -11,12 +11,13 @@ from CrossPlan.tasks import APSend
 from fediverse.views.inboxProcess.Follow import _FollowActivity
 from fediverse.views.inboxProcess.Like import _LikeActivity
 from fediverse.views.inboxProcess.Create import _CreateActivity
+from fediverse.views.inboxProcess.DeletePost import _DeletePostActivity
 
 from fediverse.models import User, FediverseUser, Follow
 
 from fediverse.lib import registerFediUser, isAPContext
 
-from pprint import pprint as pp
+from pprint import pformat
 
 # todo: sendable websocket
 
@@ -39,7 +40,8 @@ def InboxUser(request, username):
     except json.JSONDecodeError:
         return HttpResponseBadRequest()
     
-    pp(apbody)
+    logging.info("ActivityPub Recieved: ")
+    logging.info(pformat(apbody))
 
     if not isAPContext(apbody):
         return HttpResponseBadRequest()
@@ -67,8 +69,7 @@ def InboxUser(request, username):
         return HttpResponse(status=202)
     elif apbody["type"] == "Delete":
         if apbody["object"].get("type") == "Tombstone":
-            pass
-            # return _DeletePostActivity(apbody, fromUser, target)
+            return _DeletePostActivity(apbody, fromUser)
     elif apbody["type"] == "Undo":
         if apbody["object"]["type"] == "Follow":
             return _FollowActivity(apbody, fromUser, target, True)

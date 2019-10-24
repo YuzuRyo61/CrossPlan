@@ -1,4 +1,4 @@
-import datetime
+from dateutil.parser import parse
 
 from django.http.response import HttpResponse
 
@@ -9,10 +9,10 @@ from fediverse.views.renderer.activity.Reject import RenderReject
 
 def _CreateActivity(body, fromUserObj):
     newPost = Post(
-        fediId=body["object"]["id"],
+        fediID=body["object"]["id"],
         body=body["object"]["content"],
         parentFedi=fromUserObj,
-        posted=datetime.date.fromisoformat(body["object"]["published"])
+        posted=parse(body["object"]["published"])
     )
     newPost.save()
     return HttpResponse(status=202)
