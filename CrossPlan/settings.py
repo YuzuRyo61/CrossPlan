@@ -42,16 +42,20 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    # SYSTEM
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Libraries
     'django_celery_beat',
     'django_celery_results',
     'widget_tweaks',
     'channels',
+    'compressor',
+    # Projects
     'fediverse',
     'Web'
 ]
@@ -167,6 +171,14 @@ CHANNEL_LAYERS = {
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static")
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+STATICFILES_FINDERS = (
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_ENABLED = True
 
 LOGIN_URL = "Login"
 
