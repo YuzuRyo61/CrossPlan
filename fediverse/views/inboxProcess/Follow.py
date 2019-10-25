@@ -25,7 +25,12 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 targetObj.username,
                 RenderAccept(
                     targetObj.username,
-                    body["object"]
+                    RenderFollow(
+                        targetObj.username,
+                        newFollow.uuid,
+                        body["actor"],
+                        body["object"]["object"]
+                    )
                 )
             )
         return HttpResponse(status=202)
