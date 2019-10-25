@@ -5,6 +5,8 @@ import requests
 import markdown
 import logging
 
+from pprint import pformat
+
 from fediverse.models import Post, User
 from fediverse.lib import sign_header, addDefaultHeader
 
@@ -12,6 +14,8 @@ from fediverse.lib import sign_header, addDefaultHeader
 @shared_task
 def APSend(targetUrl, fromUser, dct):
     logging.info(f"APSEND => {targetUrl}")
+    logging.info("APBODY: ")
+    logging.info(pformat(dct))
     res = requests.post(
         targetUrl,
         json=dct,
