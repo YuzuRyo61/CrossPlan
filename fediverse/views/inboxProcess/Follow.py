@@ -25,12 +25,7 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 targetObj.username,
                 RenderAccept(
                     targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        newFollow.uuid,
-                        body["actor"],
-                        body["object"]
-                    )
+                    body["object"]
                 )
             )
         return HttpResponse(status=202)
@@ -43,12 +38,7 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 targetObj.username,
                 RenderUndo(
                     targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        "null",
-                        body["actor"],
-                        body["object"]
-                    )
+                    body["object"]
                 )
             )
         else:
@@ -57,12 +47,7 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 targetObj.username,
                 RenderUndo(
                     targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        unFollow.uuid,
-                        body["actor"],
-                        body["object"]
-                    )
+                    body["object"]
                 )
             )
             unFollow.delete()
