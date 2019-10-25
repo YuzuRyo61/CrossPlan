@@ -20,17 +20,13 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 fromFediUser=fromUserObj
             )
             newFollow.save()
+            body.pop("@context")
             APSend.delay(
                 fromUserObj.Inbox,
                 targetObj.username,
                 RenderAccept(
                     targetObj.username,
-                    RenderFollow(
-                        targetObj.username,
-                        newFollow.uuid,
-                        body["actor"],
-                        body["object"]["object"]
-                    )
+                    body
                 )
             )
         return HttpResponse(status=202)

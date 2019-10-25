@@ -22,10 +22,10 @@ def APSend(targetUrl, fromUser, dct):
     dctOD.move_to_end('@context', False)
     logging.info(f"APSEND => {targetUrl}")
     logging.info("APBODY: ")
-    logging.info(pformat(dct))
+    logging.info(pformat(dict(dctOD)))
     res = requests.post(
         targetUrl,
-        json=dct,
+        json=dict(dctOD),
         auth=sign_header(fromUser),
         headers=addDefaultHeader()
     )
