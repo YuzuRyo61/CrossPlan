@@ -71,12 +71,13 @@ class PostAdmin(admin.ModelAdmin):
         return False
 
 class FediverseUserAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'is_bot')
-    search_fields = ('username', 'Host', 'description')
+    list_display = ('__str__', 'display_name', 'is_bot')
+    search_fields = ('username', 'display_name', 'Host', 'description')
     fieldsets = [
         ("基本情報", {
             "fields": [
                 "username",
+                "display_name",
                 "Host",
                 "description"
             ]
@@ -84,6 +85,18 @@ class FediverseUserAdmin(admin.ModelAdmin):
         ("アカウント状態", {
             "fields": [
                 "is_bot"
+            ]
+        }),
+        ("URL", {
+            "fields": [
+                "Inbox",
+                "Outbox",
+                "SharedInbox",
+                "Featured",
+                "Followers",
+                "Following",
+                "Uri",
+                "Url"
             ]
         })
     ]
