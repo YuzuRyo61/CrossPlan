@@ -12,6 +12,7 @@ from fediverse.views.inboxProcess.Follow import _FollowActivity
 from fediverse.views.inboxProcess.Like import _LikeActivity
 from fediverse.views.inboxProcess.Create import _CreateActivity
 from fediverse.views.inboxProcess.DeletePost import _DeletePostActivity
+from fediverse.views.inboxProcess.Block import _BlockActivity
 
 from fediverse.models import User, FediverseUser, Follow
 
@@ -67,6 +68,8 @@ def InboxUser(request, username):
     elif apbody["type"] == "Accept":
         logging.info("Activity was accepted")
         return HttpResponse(status=202)
+    elif apbody["type"] == "Block":
+        return _BlockActivity(apbody, fromUser, target)
     elif apbody["type"] == "Delete":
         if apbody["object"].get("type") == "Tombstone":
             return _DeletePostActivity(apbody, fromUser)
