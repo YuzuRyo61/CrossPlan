@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth import logout
 
 from CrossPlan.tasks import NewPost as NewPostTask
 
@@ -236,3 +237,10 @@ class settings_PasswordDone(PasswordChangeDoneView):
 @login_required
 def settings_deleteAccount(request):
     return render_NPForm(request, "settings/delete_account.html")
+
+@login_required
+def settings_deleteAccountDone(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed("POST")
+    
+    logout(request)
