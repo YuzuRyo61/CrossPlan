@@ -15,21 +15,24 @@
         <div class="ui warning message">
             <div class="header">このユーザーは連合ユーザーです。</div>
             <p>このユーザーは連合ユーザーであり、最新のプロフィールでない可能性があります。</p>
-            <a href="{{ targetUser.Url }}">連合先のユーザーのプロフィールを見る</a>
+            <a target="_blank" href="{{ targetUser.Url }}">連合先のユーザーのプロフィールを見る</a>
         </div>
         {% endif %}
         {% if targetUser == user %}
-        <a class="ui button fluid" href="{% url 'Settings_Profile' %}">プロフィールを編集</a>
+        <a class="ui button fluid" href="{% url 'Settings_Profile' %}"><i class="pencil alternate icon"></i> プロフィールを編集</a>
+        {% elif user.is_authenticated %}
+        {% if targetUserRelation.following %}
+        <button class="ui button secondary fluid" id="followBtn" onclick="sendState('follow')"><i class="user times icon"></i> フォロー解除</button>
         {% else %}
-        <div class="ui primary buttons">
-            <button class="ui button fluid" onclick="sendState('follow')">フォロー</button>
-            <button class="ui floating dropdown icon button">
-                <i class="dropdown icon"></i>
-                <div class="menu">
-                    <div class="item"><i class="mute icon"></i> ミュート</div>
-                    <div class="item"><i class="ban icon"></i> ブロック</div>
-                </div>
-            </button>
+        <button class="ui button primary fluid" id="followBtn" onclick="sendState('follow')"><i class="user plus icon"></i> フォロー</button>
+        {% endif %}
+        <div class="ui accordion">
+            <div class="title"><i class="dropdown icon"></i> その他のリレーションアクション </div>
+            <div class="content">
+                <button class="ui button orange fluid" onclick="openUserMuteModal()"><i class="mute icon"></i> ミュート</button>
+                <br>
+                <button class="ui button negative fluid" onclick="openUserBlockModal()"><i class="ban icon"></i> ブロック</button>
+            </div>
         </div>
         <form method="POST" action="{% url 'UserState' %}" id="userStateForm">
             {% if isFediverseUser %}
@@ -43,6 +46,7 @@
         {% endif %}
         <div class="ui segment">
             <div>
+                {% if targetUserRelation.followed %}<div class="ui green label">フォローされています</div>{% endif %}
                 {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
             </div>
             <div>
@@ -84,10 +88,53 @@
         {% block side %}{% endblock %}
     </div>
 </div>
+
+{% if user.is_authenticated and targetUser != user %}
+<div class="ui basic modal" id="userMuteConfirm">
+    <div class="ui icon header">
+      <i class="mute icon"></i>
+      ユーザーをミュート
+    </div>
+    <div class="content">
+      <p>このユーザーをミュートしますか？</p>
+    </div>
+    <div class="actions">
+      <div class="ui basic cancel inverted button">
+        <i class="remove icon"></i>
+        いいえ
+      </div>
+      <div class="ui orange ok inverted button">
+        <i class="checkmark icon"></i>
+        はい
+      </div>
+    </div>
+</div>
+
+<div class="ui basic modal" id="userBlockConfirm">
+    <div class="ui icon header">
+      <i class="ban icon"></i>
+      ユーザーをブロック
+    </div>
+    <div class="content">
+      <p>このユーザーをブロックしようとしています。</p>
+      <p>ブロックするとフォローや投稿の閲覧が制限されます。本当に実行しますか？</p>
+    </div>
+    <div class="actions">
+      <div class="ui basic cancel inverted button">
+        <i class="remove icon"></i>
+        いいえ
+      </div>
+      <div class="ui negative ok inverted button">
+        <i class="ban icon"></i>
+        はい
+      </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block script %}
-{% if targetUser != user %}
+{% if user.is_authenticated and targetUser != user %}
 <script src="{% static 'userState.js' %}" type="text/javascript"></script>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'settings/__head.html' %}
+
+{% block title %}アカウント削除 | CrossPlan{% endblock %}
+
+{% block side %}
+<h1 class="ui header">
+    アカウント削除
+</h1>
+<hr>
+{% if user.is_superuser %}
+<p>このアカウントはスーパーユーザーであるためアカウントの削除ができません。</p>
+{% else %}
+<p>アカウントを削除しますか？削除する前に以下の内容をご確認ください。</p>
+<ul>
+    <li>すべての投稿が削除されます。削除すると元には戻せません。また、連合側の投稿が削除できるとは限りません。</li>
+    <li>同じユーザーIDで再度取得ができなくなります。</li>
+    <li>フォロー・フォロワーが全て失われます。</li>
+    <li>削除を実施すると即座に削除されます。復旧猶予期間はありません。</li>
+</ul>
+<button class="ui button negative fluid"><i class="trash icon"></i> アカウントを削除</button>
+{% endif %}
+{% endblock %}

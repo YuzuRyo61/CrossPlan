@@ -39,6 +39,13 @@ def User(request, username):
             "targetUser": targetUser,
             "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE)
         }
+        if request.user.is_authenticated and request.user != targetUser:
+            renderObj.update({
+                "targetUserRelation": {
+                    "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
+                    "followed": True if targetUser.following.filter(target=request.user).count() else False
+                }
+            })
         renderTarget = "profile.html"
         return render_NPForm(request, renderTarget, renderObj)
 
@@ -50,6 +57,13 @@ def UserFollowing(request, username):
         "targetUser": targetUser,
         "targetUserFollowing": panigateQuery(request, targetUser.following.all(), settings.USER_PER_PAGE)
     }
+    if request.user.is_authenticated and request.user != targetUser:
+        renderObj.update({
+            "targetUserRelation": {
+                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user).count() else False
+            }
+        })
     return render_NPForm(request, "profile_following.html", renderObj)
 
 def UserFollower(request, username):
@@ -60,6 +74,13 @@ def UserFollower(request, username):
         "targetUser": targetUser,
         "targetUserFollower": panigateQuery(request, targetUser.followers.all(), settings.USER_PER_PAGE)
     }
+    if request.user.is_authenticated and request.user != targetUser:
+        renderObj.update({
+            "targetUserRelation": {
+                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user).count() else False
+            }
+        })
     return render_NPForm(request, "profile_follower.html", renderObj)
 
 def INDEX(request):
@@ -81,6 +102,13 @@ def FediUser(request, username, host):
         "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE),
         "isFediverseUser": True
     }
+    if request.user.is_authenticated and request.user != targetUser:
+        renderObj.update({
+            "targetUserRelation": {
+                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user).count() else False
+            }
+        })
     return render_NPForm(request, "profile.html", renderObj)
 
 @login_required
@@ -106,10 +134,15 @@ def announce(request):
 def favorite(request):
     pass
 
-@login_required
 def userState(request):
     if request.method != "POST":
         return HttpResponseNotAllowed("POST")
+
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "NOT_AUTHENTICATED",
+            "msg": "ログインが必要です。"
+        }}))
 
     state = request.POST.get("changeState")
     if state == None:
@@ -117,17 +150,17 @@ def userState(request):
             "code": "INVALID_FORM",
             "msg": "changeStateに値がありません"
         }}))
-    
+
     if state == "follow":
         if request.POST.get("target") != None:
             try:
-                existFollow = FollowModel.objects.get(fromUser=request.user, target=User.objects.get(username__iexact=request.POST["target"])) # pylint: disable=no-member
+                existFollow = FollowModel.objects.get(fromUser=request.user, target=UserModel.objects.get(username__iexact=request.POST["target"])) # pylint: disable=no-member
                 existFollow.delete()
                 isNewFollow = False
             except ObjectDoesNotExist:
                 newFollow = FollowModel(
                     fromUser=request.user,
-                    target=get_object_or_404(User, username__iexact=request.POST["target"])
+                    target=get_object_or_404(UserModel, username__iexact=request.POST["target"])
                 )
                 isNewFollow = True
         elif request.POST.get("targetFedi") != None:
@@ -149,7 +182,7 @@ def userState(request):
         
         if isNewFollow:
             newFollow.save()
-        return HttpResponse(status=202)
+        return HttpResponse(status=204)
 
     return HttpResponse(json.dumps({"error": {
         "code": "NOT_IMPLEMENTED",
@@ -199,3 +232,7 @@ class settings_Password(PasswordChangeView):
 
 class settings_PasswordDone(PasswordChangeDoneView):
     template_name = "settings/password_done.html"
+
+@login_required
+def settings_deleteAccount(request):
+    return render_NPForm(request, "settings/delete_account.html")

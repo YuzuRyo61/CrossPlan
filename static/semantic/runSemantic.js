@@ -3,3 +3,7 @@ $('.ui.dropdown')
         action: 'select'
     })
 ;
+
+$('.ui.accordion')
+  .accordion()
+;
