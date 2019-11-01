@@ -31,13 +31,3 @@ def APSend(targetUrl, fromUser, dct):
     )
     res.raise_for_status()
     return f"Accepted: {res.status_code}"
-
-@shared_task
-def NewPost(fromUser, post_content):
-    targetUser = User.objects.get(username__iexact=fromUser)
-    newPost = Post(
-        body=markdown.Markdown().convert(post_content['body']),
-        parent=targetUser
-    )
-    newPost.save()
-    return newPost

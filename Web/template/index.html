@@ -85,6 +85,7 @@ function newPostIndex () {
             })
         })
         .fail(function (jqXHR) {
+            try {
             var res = JSON.parse(jqXHR.responseText)
             console.error("Post failed!: " + res.error.msg)
             $.uiAlert({
@@ -96,6 +97,17 @@ function newPostIndex () {
                 icon: 'remove circle',
                 time: 5,
             })
+            } catch (error) {
+            $.uiAlert({
+                textHead: '投稿できません。',
+                text: '不明なエラー',
+                bgcolor: '#DB2828',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'remove circle',
+                time: 5,
+            })
+            }
         })
         .always(function () {
             $('#postIndexSubmit').removeClass("disabled loading")

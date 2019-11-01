@@ -25,7 +25,7 @@ def WebFinger_res(request):
     if subject == None:
         return HttpResponseNotFound()
     else:
-        subject_parse = re.search(r"acct:(.+)@(.+)", subject)
+        subject_parse = re.search(r"^acct:(.+)@(.+)$", subject)
         if subject_parse == None:
             return HttpResponseNotFound()
         userInfo = get_object_or_404(UserModel, username__iexact=subject_parse.group(1), is_active=True)

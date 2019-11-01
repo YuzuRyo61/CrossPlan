@@ -1,9 +1,14 @@
 import uuid
 
+from bs4 import BeautifulSoup
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 from fediverse.lib import generate_key
+
+def scraping(text):
+    return BeautifulSoup(text, features="html.parser").get_text()
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -88,12 +93,21 @@ class Post(models.Model):
     body = models.TextField(blank=True, null=True)
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
     parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
-    announceTo = models.CharField(max_length=64, blank=True, null=True)
-    replyTo = models.CharField(max_length=64, blank=True, null=True)
+    announceTo = models.ForeignKey("self", on_delete=models.CASCADE, related_name="announced", blank=True, null=True)
+    replyTo = models.ForeignKey("self", on_delete=models.CASCADE, related_name="replies", blank=True, null=True)
     posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ('-posted', )
+    
+    def __str__(self):
+        if self.parent != None:
+            parent = self.parent
+        elif self.parentFedi != None:
+            parent = self.parentFedi
+        else:
+            parent = "[UNKNOWN]"
+        return f"{scraping(self.body)} - {parent}"
 
 class Like(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -11,8 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import logout
 
-from CrossPlan.tasks import NewPost as NewPostTask
-
 from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
@@ -118,14 +116,17 @@ def newPost(request):
         return HttpResponseNotAllowed("POST")
 
     if NewPostForm(request.POST).is_valid():
-        NewPostTask.delay(request.user.username, request.POST)
+        newPostObj = PostModel(
+            parent=request.user,
+            body=request.POST["body"]
+        )
+        newPostObj.save()
+        return HttpResponse(status=204)
     else:
         return HttpResponseBadRequest(json.dumps({"error": {
             "code": "DO_NOT_EMPTY",
             "msg": "空の投稿は投稿できません。"
         }}), content_type="application/json")
-
-    return HttpResponse(status=204)
 
 @login_required
 def announce(request):
