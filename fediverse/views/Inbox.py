@@ -40,12 +40,12 @@ def InboxUser(request, username):
         apbody = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError:
         return HttpResponseBadRequest()
-    
-    logging.info("ActivityPub Recieved: ")
-    logging.info(pformat(apbody))
 
     if not isAPContext(apbody):
         return HttpResponseBadRequest()
+
+    logging.info("ActivityPub Recieved: ")
+    logging.info(pformat(apbody))
 
     try:
         fromUser = FediverseUser.objects.get(Uri=apbody["actor"]) # pylint: disable=no-member
@@ -83,6 +83,25 @@ def InboxUser(request, username):
 
 @csrf_exempt
 def InboxPublic(request):
-    pass
+    if request.META.get('HTTP_SIGNATURE') == None:
+        return HttpResponseNotFound()
+    
+    if request.META.get("CONTENT_TYPE").startswith("application/activity+json") or request.META.get("CONTENT_TYPE").startswith("application/ld+json"):
+        pass
+    else:
+        return HttpResponseBadRequest()
+
+    try:
+        apbody = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest()
+
+    if not isAPContext(apbody):
+        return HttpResponseBadRequest()
+
+    logging.info("ActivityPub Recieved: ")
+    logging.info(pformat(apbody))
+    
+    return HttpResponse(status=501)
     
     # to-do: Inbox methods
