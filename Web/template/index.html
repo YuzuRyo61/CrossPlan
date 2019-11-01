@@ -42,7 +42,44 @@
                 <small>{{ posts.posted }}</small>
             </h4>
             <div class="post">
+                {% if not posts.announceTo %}
                 {{ posts.body|safe }}
+                {% else %}
+                <div class="ui small feed">
+                    <div class="event">
+                        <div class="content">
+                            <div class="summary">
+                                {% if posts.parent %}
+                                {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
+                                {% elif posts.parentFedi %}
+                                {% if posts.parentFedi.display_name %}{{ posts.parentFedi.display_name }}{% else %}{{ posts.parentFedi.username }}{% endif %}
+                                {% endif %}
+                                がアナウンス
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui segment">
+                    <h4 class="ui header">
+                        {% if posts.announceTo.parent %}
+                        {% if posts.announceTo.parent.display_name %}{{ posts.announceTo.parent.display_name }}{% else %}{{ posts.announceTo.parent.username }}{% endif %}
+                        {% elif posts.announceTo.parentFedi %}
+                        {% if posts.announceTo.parentFedi.display_name %}{{ posts.announceTo.parentFedi.display_name }}{% else %}{{ posts.announceTo.parentFedi.username }}{% endif %}
+                        {% endif %}
+                        <div class="sub header">
+                            {% if posts.announceTo.parent %}
+                            <a href="{% url 'UserShow' posts.announceTo.parent.username %}">@{{ posts.announceTo.parent.username }}</a>
+                            {% elif posts.announceTo.parentFedi %}
+                            <a href="{% url 'FediUserShow' posts.announceTo.parentFedi.username posts.announceTo.parentFedi.Host %}">@{{ posts.announceTo.parentFedi.username }}@{{ posts.announceTo.parentFedi.Host }}</a>
+                            {% endif %}
+                        </div>
+                    </h4>
+                    <div>
+                        {{ posts.announceTo.body|safe }}
+                    </div>
+                    <small>{{ posts.announceTo.postsed }}</small>
+                </div>
+                {% endif %}
             </div>
         </div>
         <div class="ui bottom attached menu">

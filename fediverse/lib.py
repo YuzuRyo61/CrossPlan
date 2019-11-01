@@ -1,5 +1,8 @@
+import json
 from datetime import datetime
 from json.decoder import JSONDecodeError
+from dateutil.parser import parse
+import logging
 
 from Crypto.PublicKey import RSA
 from Crypto import Random
@@ -10,10 +13,9 @@ from urllib.parse import urlparse
 
 from requests_http_signature import HTTPSignatureHeaderAuth
 
-from httpsig import HeaderSigner
-
 from django.conf import settings
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 from fediverse import models
 
@@ -30,11 +32,18 @@ def sign_header(username):
         key_id=f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:publicKey', kwargs={'username': userInfo.username})}"
     )
 
-def addDefaultHeader(header={}):
+def addDefaultHeader(header={}, isGETMethod=False):
     header.update({
         "User-Agent": f"CrossPlan/0.0.0 (https://{settings.CP_ENDPOINT}/)",
-        "Content-Type": "application/activity+json"
     })
+    if isGETMethod:
+        header.update({
+            "Accept": "application/activity+json"
+        })
+    else:
+        header.update({
+            "Content-Type": "application/activity+json"
+        })
     return header
 
 def isAPContext(apbody):
@@ -57,7 +66,7 @@ def registerFediUser(uri):
     try:
         res = requests.get(
             uri,
-            headers={"Accept": "application/activity+json"}
+            headers=addDefaultHeader()
         ).json()
         host = urlparse(uri).netloc
         if host == '':
@@ -91,3 +100,39 @@ def registerFediUser(uri):
             publicKey=publicKey,
             keyId=keyId
         )
+
+def newPostFromObj(objUrl, username):
+    res = requests.get(
+        objUrl,
+        auth=sign_header(username),
+        headers=addDefaultHeader(isGETMethod=True)
+    )
+    res.raise_for_status()
+    try:
+        resJ = res.json()
+    except json.decoder.JSONDecodeError:
+        logging.warning("Json decode ERROR. Abort fetch post object.")
+        return False
+
+    if not isAPContext(resJ):
+        return False
+    
+    if not resJ.get("type") == "Note":
+        return False
+
+    try:
+        parentUser = models.FediverseUser.objects.get(Uri=resJ["attributedTo"]) # pylint: disable=no-member
+    except ObjectDoesNotExist:
+        parentUser = registerFediUser(resJ["attributedTo"])
+        if parentUser == False:
+            return False
+        parentUser.save()
+
+    newPost = models.Post(
+        fediID=resJ["id"],
+        body=resJ["content"],
+        parentFedi=parentUser,
+        posted=parse(resJ["published"])
+    )
+
+    return newPost

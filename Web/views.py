@@ -1,5 +1,6 @@
 import json
 import html2markdown
+import markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
@@ -118,7 +119,7 @@ def newPost(request):
     if NewPostForm(request.POST).is_valid():
         newPostObj = PostModel(
             parent=request.user,
-            body=request.POST["body"]
+            body=markdown.Markdown().convert(request.POST["body"])
         )
         newPostObj.save()
         return HttpResponse(status=204)
@@ -204,7 +205,12 @@ def postDelete(request):
 
 def postDetail(request, uuid):
     post = get_object_or_404(PostModel, uuid=uuid)
-    return render_NPForm(request, "postDetail.html", {"post": post, "scraped_body": scraping(post.body)})
+    obj = {"post": post}
+    if post.announceTo == None:
+        obj.update({"scraped_body": scraping(post.body)})
+    else:
+        obj.update({"scraped_body": f"AN: {scraping(post.announceTo.body)}"})
+    return render_NPForm(request, "postDetail.html", obj)
 
 @login_required
 def settings_profile(request):
