@@ -120,6 +120,7 @@ def newPostFromObj(objUrl):
         return False
     
     if not resJ.get("type") == "Note":
+        logging.warning("This url is not Note Type. Abort.")
         return False
 
     try:
