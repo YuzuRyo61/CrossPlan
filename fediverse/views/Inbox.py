@@ -77,7 +77,7 @@ def InboxUser(request, username):
         return _BlockActivity(apbody, fromUser, target)
     elif apbody["type"] == "Delete":
         if apbody["object"].get("type") == "Tombstone":
-            return _DeletePostActivity(apbody, fromUser)
+            return _DeletePostActivity(apbody, fromUser, target)
     elif apbody["type"] == "Undo":
         if apbody["object"]["type"] == "Follow":
             return _FollowActivity(apbody, fromUser, target, True)
