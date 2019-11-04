@@ -29,12 +29,12 @@ def NodeInfo(request):
         "openRegistrations": False,
         "usage": {
             "users": {
-                "total": User.objects.all().count(),
+                "total": User.objects.filter(is_active=True).count(),
                 "activeHalfyear": 0,
                 "activeMonth": 0
             }
         },
         "metadata": {
-            
+
         }
     }), content_type="application/json")
