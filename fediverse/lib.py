@@ -32,6 +32,9 @@ def sign_header(username):
         key_id=f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:publicKey', kwargs={'username': userInfo.username})}"
     )
 
+def parse_signature(signature_header):
+    return {i.split("=", 1)[0]: i.split("=", 1)[1].strip('"') for i in signature_header.split(",")}
+
 def addDefaultHeader(header={}, isGETMethod=False):
     header.update({
         "User-Agent": f"CrossPlan/0.0.0 (https://{settings.CP_ENDPOINT}/)",

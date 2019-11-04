@@ -17,7 +17,7 @@ from fediverse.views.inboxProcess.Block import _BlockActivity
 
 from fediverse.models import User, FediverseUser, Follow
 
-from fediverse.lib import registerFediUser, isAPContext
+from fediverse.lib import registerFediUser, isAPContext, parse_signature
 
 from pprint import pformat
 
@@ -36,6 +36,8 @@ def InboxUser(request, username):
         pass
     else:
         return HttpResponseBadRequest()
+
+    # signature = parse_signature(request.META.get("HTTP_SIGNATURE"))
 
     try:
         apbody = json.loads(request.body.decode('utf-8'))
@@ -65,11 +67,14 @@ def InboxUser(request, username):
     if apbody["type"] == "Follow":
         return _FollowActivity(apbody, fromUser, target)
     elif apbody["type"] == "Create":
-        return _CreateActivity(apbody, fromUser, target)
+        return _CreateActivity(apbody, fromUser)
     elif apbody["type"] == "Like":
         return _LikeActivity(apbody, fromUser, target)
     elif apbody["type"] == "Accept":
         logging.info("Activity was accepted")
+        return HttpResponse(status=202)
+    elif apbody["type"] == "Reject":
+        logging.warn("Activity was Rejected")
         return HttpResponse(status=202)
     elif apbody["type"] == "Announce":
         return _AnnounceActivity(apbody, fromUser, target)

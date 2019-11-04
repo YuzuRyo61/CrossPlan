@@ -7,8 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.conf import settings
 from django.urls import reverse
 
-from CrossPlan.tasks import APSend
-
 from fediverse.lib import newPostFromObj
 from fediverse.models import Post
 
@@ -33,14 +31,6 @@ def _AnnounceActivity(body, fromUserObj, targetObj, undo=False):
                 raise ValueError("Object fetch error.")
             announceObj.save()
         except MultipleObjectsReturned:
-            APSend.delay(
-                fromUserObj.inbox,
-                targetObj.username,
-                RenderReject(
-                    targetObj.username,
-                    body
-                )
-            )
             return HttpResponse(status=202)
         
         newAnnounce = Post(
@@ -50,16 +40,6 @@ def _AnnounceActivity(body, fromUserObj, targetObj, undo=False):
             posted=parse(body["published"])
         )
         newAnnounce.save()
-        
-        APSend.delay(
-            fromUserObj.inbox,
-            targetObj.username,
-            RenderAccept(
-                targetObj.username,
-                body
-            )
-        )
-
         return HttpResponse(status=202)
     else:
         pass

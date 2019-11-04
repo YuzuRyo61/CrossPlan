@@ -1,5 +1,10 @@
+import re
+from urllib.parse import urlparse
+
 from django.http.response import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+from django.urls import reverse
 
 from fediverse.models import Like
 

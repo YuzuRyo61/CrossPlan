@@ -9,7 +9,7 @@ from fediverse.models import Post
 from fediverse.views.renderer.activity.Accept import RenderAccept
 from fediverse.views.renderer.activity.Reject import RenderReject
 
-def _CreateActivity(body, fromUserObj, targetObj):
+def _CreateActivity(body, fromUserObj):
     newPost = Post(
         fediID=body["object"]["id"],
         body=body["object"]["content"],
@@ -17,14 +17,4 @@ def _CreateActivity(body, fromUserObj, targetObj):
         posted=parse(body["object"]["published"])
     )
     newPost.save()
-
-    APSend.delay(
-        fromUserObj.inbox,
-        targetObj.username,
-        RenderAccept(
-            targetObj.username,
-            body
-        )
-    )
-
     return HttpResponse(status=202)

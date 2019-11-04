@@ -17,13 +17,4 @@ def _DeletePostActivity(body, fromUserObj, targetObj):
         logging.warn(f"Target FediID is not found: {body['object']['id']}")
     else:
         deletePost.delete()
-    finally:
-        APSend.delay(
-            fromUserObj.inbox,
-            targetObj.username,
-            RenderAccept(
-                targetObj.username,
-                body
-            )
-        )
     return HttpResponse(status=202)
