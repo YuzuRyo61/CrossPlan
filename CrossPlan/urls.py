@@ -18,12 +18,15 @@ from django.urls import path, include
 
 from Web import views as WebViews
 from fediverse.views.WebFinger import WebFinger_HostMeta, WebFinger_res
+from fediverse.views.NodeInfo import NodeInfo, NodeInfo_wk
 
 urlpatterns = [
     path('', WebViews.INDEX, name="INDEX"),
     path('ACP/', admin.site.urls),
     path('.well-known/hostmeta', WebFinger_HostMeta),
     path('.well-known/webfinger', WebFinger_res),
+    path('.well-known/nodeinfo', NodeInfo_wk),
+    path('nodeinfo/2.0', NodeInfo, name="NodeInfo"),
     path('AP/', include('fediverse.urls')),
     path('user/<username>', WebViews.User, name="UserShow"),
     path('user/<username>/following', WebViews.UserFollowing, name="UserShowFollowing"),
