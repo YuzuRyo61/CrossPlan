@@ -119,7 +119,7 @@ def newPostFromObj(objUrl):
     if not isAPContext(resJ):
         return False
     
-    if not resJ.get("type") == "Note":
+    if not resJ.get("type") in ["Note", "Question"]:
         logging.warning("This url is not Note Type. Abort.")
         return False
 
