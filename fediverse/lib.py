@@ -104,10 +104,9 @@ def registerFediUser(uri):
             keyId=keyId
         )
 
-def newPostFromObj(objUrl, username):
+def newPostFromObj(objUrl):
     res = requests.get(
         objUrl,
-        auth=sign_header(username),
         headers=addDefaultHeader(isGETMethod=True)
     )
     res.raise_for_status()

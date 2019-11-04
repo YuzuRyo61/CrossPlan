@@ -26,7 +26,7 @@ def _AnnounceActivity(body, fromUserObj, targetObj, undo=False):
             else:
                 announceObj = Post.objects.get(fediID=body["object"]) # pylint: disable=no-member
         except ObjectDoesNotExist:
-            announceObj = newPostFromObj(body["object"], targetObj.username)
+            announceObj = newPostFromObj(body["object"])
             if announceObj == False:
                 raise ValueError("Object fetch error.")
             announceObj.save()
