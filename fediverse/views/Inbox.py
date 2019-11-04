@@ -48,6 +48,8 @@ def InboxUser(request, username):
     logging.info("ActivityPub Recieved: ")
     logging.info(pformat(apbody))
 
+    apbody.pop("@context")
+
     try:
         fromUser = FediverseUser.objects.get(Uri=apbody["actor"]) # pylint: disable=no-member
     except ObjectDoesNotExist:
@@ -63,7 +65,7 @@ def InboxUser(request, username):
     if apbody["type"] == "Follow":
         return _FollowActivity(apbody, fromUser, target)
     elif apbody["type"] == "Create":
-        return _CreateActivity(apbody, fromUser)
+        return _CreateActivity(apbody, fromUser, target)
     elif apbody["type"] == "Like":
         return _LikeActivity(apbody, fromUser, target)
     elif apbody["type"] == "Accept":

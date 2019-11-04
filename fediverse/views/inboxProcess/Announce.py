@@ -33,14 +33,12 @@ def _AnnounceActivity(body, fromUserObj, targetObj, undo=False):
                 raise ValueError("Object fetch error.")
             announceObj.save()
         except MultipleObjectsReturned:
-            obj = body
-            obj.pop("@context")
             APSend.delay(
                 fromUserObj.inbox,
                 targetObj.username,
                 RenderReject(
                     targetObj.username,
-                    obj
+                    body
                 )
             )
             return HttpResponse(status=202)
@@ -52,15 +50,13 @@ def _AnnounceActivity(body, fromUserObj, targetObj, undo=False):
             posted=parse(body["published"])
         )
         newAnnounce.save()
-
-        obj = body
-        obj.pop("@context")
+        
         APSend.delay(
             fromUserObj.inbox,
             targetObj.username,
             RenderAccept(
                 targetObj.username,
-                obj
+                body
             )
         )
 
