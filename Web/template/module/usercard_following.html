@@ -1,0 +1,17 @@
+{% if userCard.target %}
+<div class="ui segment">
+    <h3 class="ui header">
+        {% if userCard.target.display_name %}{{ userCard.target.display_name }}{% else %}{{ userCard.target.username }}{% endif %}
+        <div class="header sub"><a href="{% url 'UserShow' userCard.target.username %}">@{{ userCard.target.username }}</a></div>
+    </h3>
+    {{ userCard.target.description|safe }}
+</div>
+{% elif userCard.targetFedi %}
+<div class="ui segment">
+    <h3 class="ui header">
+        {% if userCard.targetFedi.display_name %}{{ userCard.targetFedi.display_name }}{% else %}{{ userCard.targetFedi.username }}{% endif %}
+        <div class="header sub"><a href="{% url 'FediUserShow' userCard.targetFedi.username userCard.targetFedi.Host %}">@{{ userCard.targetFedi.username }}@{{ userCard.targetFedi.Host }}</a></div>
+    </h3>
+    {{ userCard.targetFedi.description|safe }}
+</div>
+{% endif %}

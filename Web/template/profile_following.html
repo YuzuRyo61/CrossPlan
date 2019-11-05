@@ -1,26 +1,10 @@
 {% extends '__profile_head.html' %}
 
-{% block title %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}のフォローリスト | CrossPlan{% endblock %}
+{% block title %}{% if isFediverseUser %}🌏 {% endif %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}のフォローリスト | CrossPlan{% endblock %}
 
 {% block side %}
     {% for following in targetUserFollowing %}
-    {% if following.target %}
-    <div class="ui segment">
-        <h3 class="ui header">
-            {% if following.target.display_name %}{{ following.target.display_name }}{% else %}{{ following.target.username }}{% endif %}
-            <div class="header sub"><a href="{% url 'UserShow' following.target.username %}">@{{ following.target.username }}</a></div>
-        </h3>
-        {{ following.target.description|safe }}
-    </div>
-    {% elif following.targetFedi %}
-    <div class="ui segment">
-        <h3 class="ui header">
-            {% if following.targetFedi.display_name %}{{ following.targetFedi.display_name }}{% else %}{{ following.targetFedi.username }}{% endif %}
-            <div class="header sub"><a href="{% url 'FediUserShow' following.targetFedi.username following.targetFedi.Host %}">@{{ following.targetFedi.username }}@{{ following.targetFedi.Host }}</a></div>
-        </h3>
-        {{ following.targetFedi.description|safe }}
-    </div>
-    {% endif %}
+    {% include 'module/usercard_following.html' with userCard=following %}
     {% if forloop.last %}
     <div class="ui centered grid">
         <div class="center aligned column">

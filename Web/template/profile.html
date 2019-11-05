@@ -1,77 +1,8 @@
 {% extends '__profile_head.html' %}
 
 {% block side %}
-    {% for posts in targetUserPosts %}
-    <div class="ui top attached segment" id="{{ posts.uuid }}">
-        <h4 class="ui header">
-            {% if posts.parent %}
-            {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
-            {% elif posts.parentFedi %}
-            {% if posts.parentFedi.display_name %}{{ posts.parentFedi.display_name }}{% else %}{{ posts.parentFedi.username }}{% endif %}
-            {% endif %}
-            <div class="sub header">
-                {% if posts.parent %}
-                @{{ posts.parent.username }}
-                {% elif posts.parentFedi %}
-                @{{ posts.parentFedi.username }}@{{ posts.parentFedi.Host }}
-                {% endif %}
-            </div>
-            <small>{{ posts.posted }}</small>
-        </h4>
-        <div class="post">
-            {% if not posts.announceTo %}
-            {{ posts.body|safe }}
-            {% else %}
-            <div class="ui small feed">
-                <div class="event">
-                    <div class="content">
-                        <div class="summary">
-                            {% if posts.parent %}
-                            {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
-                            {% elif posts.parentFedi %}
-                            {% if posts.parentFedi.display_name %}{{ posts.parentFedi.display_name }}{% else %}{{ posts.parentFedi.username }}{% endif %}
-                            {% endif %}
-                            がアナウンス
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="ui segment">
-                <h4 class="ui header">
-                    {% if posts.announceTo.parent %}
-                    {% if posts.announceTo.parent.display_name %}{{ posts.announceTo.parent.display_name }}{% else %}{{ posts.announceTo.parent.username }}{% endif %}
-                    {% elif posts.announceTo.parentFedi %}
-                    {% if posts.announceTo.parentFedi.display_name %}{{ posts.announceTo.parentFedi.display_name }}{% else %}{{ posts.announceTo.parentFedi.username }}{% endif %}
-                    {% endif %}
-                    <div class="sub header">
-                        {% if posts.announceTo.parent %}
-                        <a href="{% url 'UserShow' posts.announceTo.parent.username %}">@{{ posts.announceTo.parent.username }}</a>
-                        {% elif posts.announceTo.parentFedi %}
-                        <a href="{% url 'FediUserShow' posts.announceTo.parentFedi.username posts.announceTo.parentFedi.Host %}">@{{ posts.announceTo.parentFedi.username }}@{{ posts.announceTo.parentFedi.Host }}</a>
-                        {% endif %}
-                    </div>
-                </h4>
-                <div>
-                    {{ posts.announceTo.body|safe }}
-                </div>
-                <small>{{ posts.announceTo.postsed }}</small>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="ui bottom attached menu">
-        <a class="ui icon item link" href="{% url 'PostDetail' posts.uuid %}" title="詳細を表示">
-            <i class="linkify icon"></i>
-        </a>
-        {% if user.is_authenticated %}
-        <a class="ui icon item link" onclick="announce('{{ posts.uuid }}', this)" title="アナウンス">
-            <i class="retweet icon"></i>
-        </a>
-        <a class="ui icon item link" onclick="favorite('{{ posts.uuid }}', this)" title="お気に入り">
-            <i class="star icon"></i>
-        </a>
-        {% endif %}
-    </div>
+    {% for post in targetUserPosts %}
+    {% include 'module/postcard.html' %}
     {% if forloop.last %}
     <div class="ui centered grid">
         <div class="center aligned column">
