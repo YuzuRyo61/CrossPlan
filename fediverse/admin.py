@@ -12,7 +12,6 @@ class UserAdmin(admin.ModelAdmin):
         'is_bot',
         'is_suspended',
         'is_staff',
-        'is_active',
         'registered',
         'updated'
     )
@@ -27,7 +26,6 @@ class UserAdmin(admin.ModelAdmin):
         ("アカウント状態", {
             "fields": [
                 "is_bot",
-                "is_active",
                 "is_suspended",
                 "is_staff",
                 "is_superuser"
@@ -41,7 +39,11 @@ class UserAdmin(admin.ModelAdmin):
         })
     ]
     search_fields = ['username', 'display_name']
-    list_filter = ['registered', 'updated', 'is_staff', 'is_suspended', 'is_active']
+    list_filter = ['registered', 'updated', 'is_staff', 'is_suspended']
+
+    def get_queryset(self, request):
+        sqs = super().get_queryset(request)
+        return sqs.filter(is_active=True)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -54,6 +56,10 @@ class UserAdmin(admin.ModelAdmin):
             return only
         else:
             return ["is_superuser", "is_active", "is_suspended", "groups", "user_permissions"]
+        
+    def delete_model(self, request, obj):
+        obj.is_active = False
+        obj.save()
 
 class PostAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'parent', 'parentFedi', 'posted')
