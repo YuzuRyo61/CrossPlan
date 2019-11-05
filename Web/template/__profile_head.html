@@ -65,19 +65,19 @@
             <div class="ui relaxed divided list">
                 <div class="item">
                     <div class="content">
-                        <a class="header" href="{% if isFediverseUser %}{% else %}{% url 'UserShow' targetUser.username %}{% endif %}">投稿</a>
+                        <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShow' targetUser.username targetUser.Host %}{% else %}{% url 'UserShow' targetUser.username %}{% endif %}">投稿</a>
                         <div class="description">{{ targetUser.posts.all.count }}</div>
                     </div>
                 </div>
                 <div class="item">
                     <div class="content">
-                        <a class="header" href="{% if isFediverseUser %}{% else %}{% url 'UserShowFollowing' targetUser.username %}{% endif %}">フォロー</a>
+                        <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShowFollowing' targetUser.username targetUser.Host %}{% else %}{% url 'UserShowFollowing' targetUser.username %}{% endif %}">フォロー</a>
                         <div class="description">{{ targetUser.following.all.count }}</div>
                     </div>
                 </div>
                 <div class="item">
                     <div class="content">
-                        <a class="header" href="{% if isFediverseUser %}{% else %}{% url 'UserShowFollower' targetUser.username %}{% endif %}">フォロワー</a>
+                        <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShowFollower' targetUser.username targetUser.Host %}{% else %}{% url 'UserShowFollower' targetUser.username %}{% endif %}">フォロワー</a>
                         <div class="description">{{ targetUser.followers.all.count }}</div>
                     </div>
                 </div>

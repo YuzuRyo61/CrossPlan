@@ -44,5 +44,7 @@ urlpatterns = [
     path('settings/password/done', WebViews.settings_PasswordDone.as_view(), name="Settings_PasswordDone"),
     path('settings/deletion', WebViews.settings_deleteAccount, name="Settings_DeleteAccount"),
     path('settings/deletion/done', WebViews.settings_deleteAccountDone, name="Settings_DeleteAccountDone"),
-    path('fediuser/<username>@<host>', WebViews.FediUser, name="FediUserShow")
+    path('fediuser/<username>@<host>', WebViews.FediUser, name="FediUserShow"),
+    path('fediuser/<username>@<host>/following', WebViews.FediUserFollowing, name="FediUserShowFollowing"),
+    path('fediuser/<username>@<host>/follower', WebViews.FediUserFollower, name="FediUserShowFollower")
 ]

@@ -111,6 +111,46 @@ def FediUser(request, username, host):
         })
     return render_NPForm(request, "profile.html", renderObj)
 
+def FediUserFollowing(request, username, host):
+    try:
+        targetUser = FediverseUser.objects.get(username__iexact=username, Host__iexact=host) # pylint: disable=no-member
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+    
+    renderObj = {
+        "targetUser": targetUser,
+        "targetUserFollowing": panigateQuery(request, targetUser.following.all(), settings.USER_PER_PAGE),
+        "isFediverseUser": True
+    }
+    if request.user.is_authenticated and request.user != targetUser:
+        renderObj.update({
+            "targetUserRelation": {
+                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user).count() else False
+            }
+        })
+    return render_NPForm(request, "profile_following.html", renderObj)
+
+def FediUserFollower(request, username, host):
+    try:
+        targetUser = FediverseUser.objects.get(username__iexact=username, Host__iexact=host) # pylint: disable=no-member
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+    
+    renderObj = {
+        "targetUser": targetUser,
+        "targetUserFollower": panigateQuery(request, targetUser.followers.all(), settings.USER_PER_PAGE),
+        "isFediverseUser": True
+    }
+    if request.user.is_authenticated and request.user != targetUser:
+        renderObj.update({
+            "targetUserRelation": {
+                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user).count() else False
+            }
+        })
+    return render_NPForm(request, "profile_follower.html", renderObj)
+
 @login_required
 def newPost(request):
     if request.method != "POST":
