@@ -29,4 +29,4 @@ def APSend(targetUrl, fromUser, dct):
         headers=addDefaultHeader()
     )
     res.raise_for_status()
-    return f"Accepted: {res.status_code}"
+    return res.status_code

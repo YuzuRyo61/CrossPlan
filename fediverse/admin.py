@@ -116,3 +116,5 @@ class FediverseUserAdmin(admin.ModelAdmin):
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Post, PostAdmin)
 admin.site.register(models.FediverseUser, FediverseUserAdmin)
+admin.site.register(models.BlackDomain)
+admin.site.register(models.Like)

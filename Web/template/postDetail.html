@@ -57,7 +57,11 @@
     </div>
     {% endif %}
 </div>
-<small>{{ post.posted }}</small>
+<small>{{ post.posted }} </small>
+<div class="ui horizontal list">
+    <p class="item"><i class="retweet icon"></i> {{ post.announced.count }}</p>
+    <p class="item"><i class="star icon"></i> {{ post.liked.count }}</p>
+</div>
 <hr>
 {% if user.is_authenticated %}
 <div class="ui buttons">

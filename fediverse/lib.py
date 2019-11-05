@@ -67,10 +67,12 @@ def isAPContext(apbody):
 
 def registerFediUser(uri):
     try:
-        res = requests.get(
+        resRaw = requests.get(
             uri,
-            headers=addDefaultHeader()
-        ).json()
+            headers=addDefaultHeader(isGETMethod=True)
+        )
+        resRaw.raise_for_status()
+        res = resRaw.json()
         host = urlparse(uri).netloc
         if host == '':
             return False

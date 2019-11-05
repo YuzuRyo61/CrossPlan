@@ -19,7 +19,7 @@ def _AnnounceActivity(body, fromUserObj, targetObj, undo=False):
     if not undo:
         try:
             if urlparse(body["object"]).netloc == settings.CP_ENDPOINT:
-                uuidRaw = re.match(reverse("PostDetail", kwargs={"uuid": "(.+)"}), body["object"])
+                uuidRaw = re.match(f"^https://{settings.CP_ENDPOINT}" + reverse("PostDetail", kwargs={"uuid": "(.+)"}), body["object"])
                 if uuidRaw == None:
                     raise ValueError("URL parse error.")
                 announceObj = Post.objects.get(uuid=uuidRaw.group(1)) # pylint: disable=no-member

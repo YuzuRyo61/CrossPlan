@@ -1,6 +1,8 @@
 import logging
 import json
 
+from urllib.parse import urlparse
+
 from django.shortcuts import get_object_or_404
 from django.http.response import HttpResponse, HttpResponseNotAllowed, HttpResponseGone, HttpResponseNotFound, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +17,7 @@ from fediverse.views.inboxProcess.Announce import _AnnounceActivity
 from fediverse.views.inboxProcess.DeletePost import _DeletePostActivity
 from fediverse.views.inboxProcess.Block import _BlockActivity
 
-from fediverse.models import User, FediverseUser, Follow
+from fediverse.models import User, FediverseUser, Follow, BlackDomain
 
 from fediverse.lib import registerFediUser, isAPContext, parse_signature
 
@@ -37,7 +39,8 @@ def InboxUser(request, username):
     else:
         return HttpResponseBadRequest()
 
-    # signature = parse_signature(request.META.get("HTTP_SIGNATURE"))
+    signature = parse_signature(request.META.get("HTTP_SIGNATURE"))
+    host = urlparse(signature["keyId"])
 
     try:
         apbody = json.loads(request.body.decode('utf-8'))
@@ -46,6 +49,11 @@ def InboxUser(request, username):
 
     if not isAPContext(apbody):
         return HttpResponseBadRequest()
+
+    for bd in BlackDomain.objects.all(): # pylint: disable=no-member
+        if host.netloc == bd.targetDomain:
+            logging.warn(f"ActivityPub Received, but it is blacklisted domain: {host.netloc}")
+            return HttpResponse(status=202)
 
     logging.info("ActivityPub Recieved: ")
     logging.info(pformat(apbody))
@@ -57,6 +65,7 @@ def InboxUser(request, username):
     except ObjectDoesNotExist:
         fromUser = registerFediUser(apbody["actor"])
         if fromUser == False:
+            logging.warn("Fediverse user fetch failed.")
             return HttpResponseBadRequest()
         else:
             fromUser.save()
@@ -86,6 +95,8 @@ def InboxUser(request, username):
     elif apbody["type"] == "Undo":
         if apbody["object"]["type"] == "Follow":
             return _FollowActivity(apbody, fromUser, target, True)
+        if apbody["object"]["type"] == "Like":
+            return _LikeActivity(apbody, fromUser, target, True)
 
     return HttpResponse(status=501)
     

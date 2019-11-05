@@ -20,7 +20,6 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
                 fromFediUser=fromUserObj
             )
             newFollow.save()
-            body.pop("@context")
             APSend.delay(
                 fromUserObj.Inbox,
                 targetObj.username,

@@ -83,6 +83,7 @@ class FediverseUser(models.Model):
     Url = models.URLField(blank=True, null=True)
     publicKey = models.TextField(blank=True, null=True)
     keyId = models.CharField(max_length=512, blank=True, null=True)
+    is_suspended = models.BooleanField(default=False)
 
     def __str__(self):
         return f"@{self.username}@{self.Host}"
@@ -109,15 +110,28 @@ class Post(models.Model):
             parent = "[UNKNOWN]"
         return f"{scraping(self.body)} - {parent}"
 
-class Like(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked"),
-    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
-    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
-
 class Follow(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers", blank=True, null=True)
     targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="followers", blank=True, null=True)
     fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
     fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
+
+class Like(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked", null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+
+class Block(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocked", blank=True, null=True)
+    targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="blocked", blank=True, null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocking", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="blocking", blank=True, null=True)
+
+class BlackDomain(models.Model):
+    targetDomain = models.CharField(max_length=256, unique=True)
+
+    def __str__(self):
+        return self.targetDomain
