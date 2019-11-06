@@ -101,7 +101,8 @@ class FediverseUserAdmin(admin.ModelAdmin):
         }),
         ("アカウント状態", {
             "fields": [
-                "is_bot"
+                "is_bot",
+                "is_manualFollow"
             ]
         }),
         ("URL", {
