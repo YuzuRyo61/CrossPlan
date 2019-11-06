@@ -56,9 +56,17 @@
                 {% endif %}
             </div>
         </div>
-        <main style="padding-top: 7em;">
+        <main style="padding-top: 7em; margin-bottom: 15px;">
             <div class="ui container">
                 {% block body %}{% endblock %}
+            </div>
+            <div class="ui equal width center aligned padded grid" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="column">
+                        <hr>
+                        <p>Powered by CrossPlan. Version: {{ CP_VERSION }}</p>
+                    </div>
+                </div>
             </div>
         </main>
         {% if user.is_authenticated %}

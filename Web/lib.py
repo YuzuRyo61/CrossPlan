@@ -1,3 +1,5 @@
+import requests
+import logging
 from bs4 import BeautifulSoup
 
 from django.shortcuts import render
@@ -49,3 +51,26 @@ def panigateQuery(request, queryset, count):
 
 def scraping(text):
     return BeautifulSoup(text, features="html.parser").get_text()
+
+def getProfWF(username, host):
+    try:
+        logging.info(f"fetching profile from webfinger: {username}@{host}")
+        resRaw = requests.get(
+            f"https://{host}/.well-known/webfinger?resource=acct:{username}@{host}"
+        )
+        res = resRaw.json()
+    except:
+        logging.error(f"fetch failed: {username}@{host}")
+        return None
+    
+    if res.get("links") == None:
+        logging.error(f"fetch failed (no links): {username}@{host}")
+        return None
+
+    for link in res["links"]:
+        if link.get("rel") == "self" and link.get("type") == "application/activity+json":
+            logging.info(f"fetched profile from webfinger: {link.get('href')}")
+            return link.get("href")
+    
+    logging.error(f"fetch failed (no self rel): {username}@{host}")
+    return None

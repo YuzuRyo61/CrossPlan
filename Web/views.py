@@ -4,7 +4,7 @@ import markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, HttpResponseGone
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, HttpResponseGone, Http404
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
@@ -13,12 +13,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import logout
 
 from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel
+from fediverse.lib import registerFediUser
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
 from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm
-from .lib import isAPHeader, render_NPForm, panigateQuery, scraping
+from .lib import isAPHeader, render_NPForm, panigateQuery, scraping, getProfWF
 
 # Create your views here.
 class LoginView(LoginView): # pylint: disable=function-redefined
@@ -88,13 +89,19 @@ def INDEX(request):
         return render_NPForm(request, 'index.html', {"timeline": timeline})
     else:
         superusers = UserModel.objects.filter(is_superuser=True) # pylint: disable=no-member
-        return render(request, 'landing.html', {"endpoint": settings.CP_ENDPOINT, "version": settings.CP_VERSION, "superusers": superusers})
+        return render(request, 'landing.html', {"superusers": superusers})
 
 def FediUser(request, username, host):
     try:
         targetUser = FediverseUser.objects.get(username__iexact=username, Host__iexact=host) # pylint: disable=no-member
     except ObjectDoesNotExist:
-        return HttpResponseNotFound()
+        targetUrl = getProfWF(username, host)
+        if targetUrl == None:
+            raise Http404()
+        targetUser = registerFediUser(targetUrl)
+        if targetUser == None:
+            return HttpResponse(status=500)
+        targetUser.save()
     
     renderObj = {
         "targetUser": targetUser,
