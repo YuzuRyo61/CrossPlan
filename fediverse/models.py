@@ -53,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_silence = models.BooleanField(default=False)
     is_suspended = models.BooleanField(default=False)
+    is_manualFollow = models.BooleanField(default=False)
     registered = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     publicKey = models.TextField(blank=True, editable=False)
@@ -84,6 +85,7 @@ class FediverseUser(models.Model):
     publicKey = models.TextField(blank=True, null=True)
     keyId = models.CharField(max_length=512, blank=True, null=True)
     is_suspended = models.BooleanField(default=False)
+    is_manualFollow = models.BooleanField(default=False)
 
     def __str__(self):
         return f"@{self.username}@{self.Host}"
