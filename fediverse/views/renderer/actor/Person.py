@@ -17,11 +17,11 @@ def RenderUser(username):
         "name": target.display_name if target.display_name != '' else None,
         "preferredUsername": target.username,
         "summary": target.description,
-        "inbox": f"https://{settings.CP_ENDPOINT}/AP/user/{target.username}/inbox",
-        "outbox": f"https://{settings.CP_ENDPOINT}/AP/user/{target.username}/outbox",
-        "following": f"https://{settings.CP_ENDPOINT}/AP/user/{target.username}/following",
-        "followers": f"https://{settings.CP_ENDPOINT}/AP/user/{target.username}/followers",
+        "inbox": f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:Inbox', kwargs={'username': target.username})}",
+        "outbox": f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:Outbox', kwargs={'username': target.username})}",
+        "following": f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:Following', kwargs={'username': target.username})}",
+        "followers": f"https://{settings.CP_ENDPOINT}{reverse('Fediverse:Followers', kwargs={'username': target.username})}",
         "url": f"https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': target.username})}",
-        "manuallyApprovesFollowers": False,
-        "publicKey": RenderKey(target.username)
+        "manuallyApprovesFollowers": target.is_manualFollow,
+        "publicKey": RenderKey(target.username, False)
     }
