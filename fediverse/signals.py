@@ -1,4 +1,5 @@
 import logging
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.urls import reverse
@@ -22,8 +23,11 @@ from pprint import pprint as pp
 def savePostSignal(sender, instance, created, **kwargs):
     if created and instance.parent != None:
         logging.info(f"SEND [CREATE] => {str(instance.uuid)}")
+        sent_domains = []
         for followers in instance.parent.followers.all():
             if followers.fromFediUser != None:
+                if followers.fromFediUser.Host in sent_domains:
+                    continue
                 APSend.delay(
                     followers.fromFediUser.SharedInbox if followers.fromFediUser.SharedInbox != None else followers.fromFediUser.Inbox,
                     instance.parent.username,
@@ -40,6 +44,7 @@ def savePostSignal(sender, instance, created, **kwargs):
                         )
                     ))
                 )
+                sent_domains.append(followers.fromFediUser.Host)
 
 @receiver(post_save, sender=Like)
 def savePostLike(sender, instance, created, **kwargs):
