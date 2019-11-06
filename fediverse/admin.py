@@ -87,8 +87,21 @@ class PostAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+def make_suspend(modeladmin, request, queryset):
+    queryset.update(is_suspended=True)
+make_suspend.short_description = "選択したユーザーを凍結"
+
+def destroy_suspend(modeladmin, request, queryset):
+    queryset.update(is_suspended=False)
+destroy_suspend.short_description = "選択したユーザーを凍結解除"
+
 class FediverseUserAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "display_name", "is_bot")
+    list_display = ("__str__", "display_name", "is_bot", "is_suspended")
+    list_filter = (
+        "Host",
+        "is_bot",
+        "is_suspended"
+    )
     search_fields = ("username", "display_name", "Host", "description")
     fieldsets = [
         ("基本情報", {
@@ -102,7 +115,8 @@ class FediverseUserAdmin(admin.ModelAdmin):
         ("アカウント状態", {
             "fields": [
                 "is_bot",
-                "is_manualFollow"
+                "is_manualFollow",
+                "is_suspended"
             ]
         }),
         ("URL", {
@@ -118,6 +132,7 @@ class FediverseUserAdmin(admin.ModelAdmin):
             ]
         })
     ]
+    actions = [make_suspend, destroy_suspend]
 
     def has_add_permission(self, request, obj=None):
         return False
