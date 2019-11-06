@@ -88,6 +88,14 @@ def registerFediUser(uri):
         else:
             keyId = None
             publicKey = None
+        
+        if res.get("sharedInbox") == None:
+            if res.get("endpoints") != None and res["endpoints"].get("sharedInbox") != None:
+                sharedInbox = res["endpoints"].get("sharedInbox")
+            else:
+                sharedInbox = None
+        else:
+            sharedInbox = res["sharedInbox"]
 
         return models.FediverseUser(
             username=res["preferredUsername"],
@@ -96,7 +104,7 @@ def registerFediUser(uri):
             Host=host,
             Inbox=res["inbox"],
             Outbox=res.get("outbox"),
-            SharedInbox=res.get("sharedInbox"),
+            SharedInbox=sharedInbox,
             Featured=res.get("featured"),
             Followers=res.get("followers"),
             Following=res.get("following"),
