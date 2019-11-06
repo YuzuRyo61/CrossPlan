@@ -69,6 +69,10 @@ def InboxUser(request, username):
             return HttpResponseBadRequest()
         else:
             fromUser.save()
+            
+    if fromUser.is_suspended == True:
+        logging.warn("This user is suspended in this server.")
+        return HttpResponse(status=202)
 
     if apbody.get("type") == None or type(apbody.get("type")) != str:
         return HttpResponseBadRequest()
