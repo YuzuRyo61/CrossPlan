@@ -38,13 +38,18 @@ def User(request, username):
             return HttpResponseGone()
         renderObj = {
             "targetUser": targetUser,
-            "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE)
+            "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE),
+            "targetUserCount": {
+                "following": targetUser.following.filter(is_pending=False).count(),
+                "followers": targetUser.followers.filter(is_pending=False).count()
+            }
         }
         if request.user.is_authenticated and request.user != targetUser:
             renderObj.update({
                 "targetUserRelation": {
-                    "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
-                    "followed": True if targetUser.following.filter(target=request.user).count() else False
+                    "following": True if targetUser.followers.filter(fromUser=request.user, is_pending=False).count() else False,
+                    "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
+                    "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False
                 }
             })
         return render_NPForm(request, "profile.html", renderObj)
@@ -55,13 +60,18 @@ def UserFollowing(request, username):
         return HttpResponseGone()
     renderObj = {
         "targetUser": targetUser,
-        "targetUserFollowing": panigateQuery(request, targetUser.following.all(), settings.USER_PER_PAGE)
+        "targetUserFollowing": panigateQuery(request, targetUser.following.filter(is_pending=False), settings.USER_PER_PAGE),
+        "targetUserCount": {
+            "following": targetUser.following.filter(is_pending=False).count(),
+            "followers": targetUser.followers.filter(is_pending=False).count()
+        }
     }
     if request.user.is_authenticated and request.user != targetUser:
         renderObj.update({
             "targetUserRelation": {
-                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
-                "followed": True if targetUser.following.filter(target=request.user).count() else False
+                "following": True if targetUser.followers.filter(fromUser=request.user, is_pending=False).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
+                "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False
             }
         })
     return render_NPForm(request, "profile_following.html", renderObj)
@@ -72,13 +82,18 @@ def UserFollower(request, username):
         return HttpResponseGone()
     renderObj = {
         "targetUser": targetUser,
-        "targetUserFollower": panigateQuery(request, targetUser.followers.all(), settings.USER_PER_PAGE)
+        "targetUserFollower": panigateQuery(request, targetUser.followers.filter(is_pending=False), settings.USER_PER_PAGE),
+        "targetUserCount": {
+            "following": targetUser.following.filter(is_pending=False).count(),
+            "followers": targetUser.followers.filter(is_pending=False).count()
+        }
     }
     if request.user.is_authenticated and request.user != targetUser:
         renderObj.update({
             "targetUserRelation": {
-                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
-                "followed": True if targetUser.following.filter(target=request.user).count() else False
+                "following": True if targetUser.followers.filter(fromUser=request.user, is_pending=False).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
+                "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False
             }
         })
     return render_NPForm(request, "profile_follower.html", renderObj)
@@ -106,13 +121,18 @@ def FediUser(request, username, host):
     renderObj = {
         "targetUser": targetUser,
         "targetUserPosts": panigateQuery(request, targetUser.posts.all(), settings.OBJECT_PER_PAGE),
-        "isFediverseUser": True
+        "isFediverseUser": True,
+        "targetUserCount": {
+            "following": targetUser.following.filter(is_pending=False).count(),
+            "followers": targetUser.followers.filter(is_pending=False).count()
+        }
     }
-    if request.user.is_authenticated and request.user != targetUser:
+    if request.user.is_authenticated:
         renderObj.update({
             "targetUserRelation": {
-                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
-                "followed": True if targetUser.following.filter(target=request.user).count() else False
+                "following": True if targetUser.followers.filter(fromUser=request.user, is_pending=False).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
+                "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False
             }
         })
     return render_NPForm(request, "profile.html", renderObj)
@@ -125,14 +145,19 @@ def FediUserFollowing(request, username, host):
     
     renderObj = {
         "targetUser": targetUser,
-        "targetUserFollowing": panigateQuery(request, targetUser.following.all(), settings.USER_PER_PAGE),
-        "isFediverseUser": True
+        "targetUserFollowing": panigateQuery(request, targetUser.following.filter(is_pending=False), settings.USER_PER_PAGE),
+        "isFediverseUser": True,
+        "targetUserCount": {
+            "following": targetUser.following.filter(is_pending=False).count(),
+            "followers": targetUser.followers.filter(is_pending=False).count()
+        }
     }
-    if request.user.is_authenticated and request.user != targetUser:
+    if request.user.is_authenticated:
         renderObj.update({
             "targetUserRelation": {
-                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
-                "followed": True if targetUser.following.filter(target=request.user).count() else False
+                "following": True if targetUser.followers.filter(fromUser=request.user, is_pending=False).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
+                "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False
             }
         })
     return render_NPForm(request, "profile_following.html", renderObj)
@@ -145,14 +170,19 @@ def FediUserFollower(request, username, host):
     
     renderObj = {
         "targetUser": targetUser,
-        "targetUserFollower": panigateQuery(request, targetUser.followers.all(), settings.USER_PER_PAGE),
-        "isFediverseUser": True
+        "targetUserFollower": panigateQuery(request, targetUser.followers.filter(is_pending=False), settings.USER_PER_PAGE),
+        "isFediverseUser": True,
+        "targetUserCount": {
+            "following": targetUser.following.filter(is_pending=False).count(),
+            "followers": targetUser.followers.filter(is_pending=False).count()
+        }
     }
-    if request.user.is_authenticated and request.user != targetUser:
+    if request.user.is_authenticated:
         renderObj.update({
             "targetUserRelation": {
-                "following": True if targetUser.followers.filter(fromUser=request.user).count() else False,
-                "followed": True if targetUser.following.filter(target=request.user).count() else False
+                "following": True if targetUser.followers.filter(fromUser=request.user, is_pending=False).count() else False,
+                "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
+                "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False
             }
         })
     return render_NPForm(request, "profile_follower.html", renderObj)

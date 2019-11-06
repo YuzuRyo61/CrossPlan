@@ -15,7 +15,7 @@ def Following(request, username):
     target = get_object_or_404(User, username__iexact=username)
     if target.is_active == False:
         return HttpResponseGone()
-    following = target.following.all()
+    following = target.following.filter(is_pending=False)
     if "page" in request.GET:
         offset = int(request.GET.get("offset", 1))
         if offset <= 0:

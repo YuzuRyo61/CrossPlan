@@ -17,7 +17,8 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
         else:
             newFollow = Follow(
                 target=targetObj,
-                fromFediUser=fromUserObj
+                fromFediUser=fromUserObj,
+                is_pending=False
             )
             newFollow.save()
             APSend.delay(

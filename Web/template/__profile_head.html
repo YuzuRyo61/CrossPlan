@@ -48,6 +48,7 @@
             <div>
                 {% if targetUserRelation.followed %}<div class="ui green label">フォローされています</div>{% endif %}
                 {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
+                {% if targetUserRelation.followPending %}<div class="ui orange label">フォロー処理中</div>{% endif %}
             </div>
             <div>
                 {% if targetUser.description %}
@@ -72,13 +73,13 @@
                 <div class="item">
                     <div class="content">
                         <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShowFollowing' targetUser.username targetUser.Host %}{% else %}{% url 'UserShowFollowing' targetUser.username %}{% endif %}">フォロー</a>
-                        <div class="description">{{ targetUser.following.all.count }}</div>
+                        <div class="description">{{ targetUserCount.following }}</div>
                     </div>
                 </div>
                 <div class="item">
                     <div class="content">
                         <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShowFollower' targetUser.username targetUser.Host %}{% else %}{% url 'UserShowFollower' targetUser.username %}{% endif %}">フォロワー</a>
-                        <div class="description">{{ targetUser.followers.all.count }}</div>
+                        <div class="description">{{ targetUserCount.followers }}</div>
                     </div>
                 </div>
             </div>

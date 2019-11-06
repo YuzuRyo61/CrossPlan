@@ -1,5 +1,6 @@
 import logging
 import json
+import re
 
 from urllib.parse import urlparse
 
@@ -7,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.http.response import HttpResponse, HttpResponseNotAllowed, HttpResponseGone, HttpResponseNotFound, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
+from django.conf import settings
 
 from CrossPlan.tasks import APSend
 
@@ -84,10 +87,41 @@ def InboxUser(request, username):
     elif apbody["type"] == "Like":
         return _LikeActivity(apbody, fromUser, target)
     elif apbody["type"] == "Accept":
-        logging.info("Activity was accepted")
+        if apbody["object"].get("type") == "Follow":
+            res = re.search(f"^https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': '(.+)'})}#follow_(.+)", apbody["object"]["id"])
+            if res == None:
+                logging.error("Follow parse error.")
+                return HttpResponse(status=202)
+            uuid = res.group(2)
+            try:
+                followObj = Follow.objects.get(uuid=uuid) # pylint: disable=no-member
+                followObj.is_pending = False
+                followObj.save()
+                logging.info("Follow was accepted")
+                return HttpResponse(status=202)
+            except ObjectDoesNotExist:
+                logging.warn("Follow object was not found")
+                return HttpResponse(status=202)
+        else:
+            logging.info("Accept activity recieved, but type work is unknown.")
         return HttpResponse(status=202)
     elif apbody["type"] == "Reject":
-        logging.warn("Activity was Rejected")
+        if apbody["object"].get("type") == "Follow":
+            res = re.search(f"^https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': '(.+)'})}#follow_(.+)", apbody["object"]["id"])
+            if res == None:
+                logging.error("Follow parse error.")
+                return HttpResponse(status=202)
+            uuid = res.group(2)
+            try:
+                followObj = Follow.objects.get(uuid=uuid) # pylint: disable=no-member
+                followObj.delete()
+                logging.info("Follow was rejected")
+                return HttpResponse(status=202)
+            except ObjectDoesNotExist:
+                logging.warn("Follow object was not found")
+                return HttpResponse(status=202)
+        else:
+            logging.info("Reject activity recieved, but type work is unknown.")
         return HttpResponse(status=202)
     elif apbody["type"] == "Announce":
         return _AnnounceActivity(apbody, fromUser, target)
