@@ -11,7 +11,7 @@ from fediverse.models import Post, User
 from fediverse.lib import sign_header, addDefaultHeader
 
 # resource: https://dot-blog.jp/news/django-async-celery-redis-mac/
-@shared_task
+@shared_task(max_retries=10, default_retry_delays=60)
 def APSend(targetUrl, fromUser, dct):
     dctOD = OrderedDict(**dct)
     dctOD['@context'] = [
@@ -22,11 +22,15 @@ def APSend(targetUrl, fromUser, dct):
     logging.info(f"APSEND => {targetUrl}")
     logging.info("APBODY: ")
     logging.info(pformat(dict(dctOD)))
-    res = requests.post(
-        targetUrl,
-        json=dict(dctOD),
-        auth=sign_header(fromUser),
-        headers=addDefaultHeader()
-    )
-    res.raise_for_status()
+    try:
+        res = requests.post(
+            targetUrl,
+            json=dict(dctOD),
+            auth=sign_header(fromUser),
+            headers=addDefaultHeader()
+        )
+        res.raise_for_status()
+    except:
+        logging.warn("APSend was failed. It will be try to retry.")
+        raise APSend.retry()
     return res.status_code
