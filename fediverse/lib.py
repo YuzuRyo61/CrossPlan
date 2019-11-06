@@ -37,7 +37,7 @@ def parse_signature(signature_header):
 
 def addDefaultHeader(header={}, isGETMethod=False):
     header.update({
-        "User-Agent": f"CrossPlan/0.0.0 (https://{settings.CP_ENDPOINT}/)",
+        "User-Agent": f"CrossPlan/{str(settings.CP_VERSION)} (https://{settings.CP_ENDPOINT}/)",
     })
     if isGETMethod:
         header.update({

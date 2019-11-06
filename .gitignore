@@ -4,7 +4,6 @@
 
 ### Code ###
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -129,7 +128,7 @@ dmypy.json
 # End of https://www.gitignore.io/api/code,django
 
 # Python virtualenv
-venv/
+venv*/
 
 # environment file (deployment)
 .env

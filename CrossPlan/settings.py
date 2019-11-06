@@ -14,6 +14,7 @@ import os
 import socket
 import logging
 from dotenv import load_dotenv
+from distutils.version import LooseVersion
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +36,7 @@ if os.environ.get('CP_ENV', 'development') == 'development':
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    os.environ.get('CP_ENDPOINT', 'localhost')
+    os.environ.get('CP_ENDPOINT', 'localhost:8000')
 ]
 
 
@@ -156,6 +157,9 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_URL = f'redis://{os.environ.get("CP_REDIS_HOST", "localhost")}:{str(os.environ.get("CP_REDIS_PORT", "6379"))}/1'
 
 CP_ENDPOINT = os.environ.get('CP_ENDPOINT', 'localhost:8000')
+
+with open(os.path.join(BASE_DIR, ".crossplan_version"), "r", encoding="utf-8") as cv:
+    CP_VERSION = LooseVersion(cv.readline().rstrip(os.linesep))
 
 ASGI_APPLICATION = 'CrossPlan.routing.application'
 
