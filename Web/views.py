@@ -46,8 +46,7 @@ def User(request, username):
                     "followed": True if targetUser.following.filter(target=request.user).count() else False
                 }
             })
-        renderTarget = "profile.html"
-        return render_NPForm(request, renderTarget, renderObj)
+        return render_NPForm(request, "profile.html", renderObj)
 
 def UserFollowing(request, username):
     targetUser = get_object_or_404(UserModel, username__iexact=username)
@@ -285,7 +284,6 @@ class settings_PasswordDone(PasswordChangeDoneView):
 def settings_deleteAccount(request):
     return render_NPForm(request, "settings/delete_account.html")
 
-@login_required
 def settings_deleteAccountDone(request):
     if request.method != "POST":
         return HttpResponseNotAllowed("POST")
