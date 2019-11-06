@@ -89,7 +89,7 @@ def INDEX(request):
         return render_NPForm(request, 'index.html', {"timeline": timeline})
     else:
         superusers = UserModel.objects.filter(is_superuser=True) # pylint: disable=no-member
-        return render(request, 'landing.html', {"endpoint": settings.CP_ENDPOINT, "superusers": superusers})
+        return render(request, 'landing.html', {"endpoint": settings.CP_ENDPOINT, "version": settings.CP_VERSION, "superusers": superusers})
 
 def FediUser(request, username, host):
     try:
