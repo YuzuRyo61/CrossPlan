@@ -138,7 +138,8 @@ def InboxUser(request, username):
         elif apbody["object"]["type"] == "Block":
             return _BlockActivity(apbody, fromUser, target, True)
 
-    return HttpResponse(status=501)
+    logging.error(f"Sorry, this type is not implemented!: {apbody['type']}")
+    return HttpResponse(status=202)
     
     # to-do: Inbox methods
 
