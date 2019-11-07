@@ -11,45 +11,35 @@ from fediverse.models import Follow
 
 def _FollowActivity(body, fromUserObj, targetObj, undo=False):
     if not undo:
-        if Follow.objects.filter(target=targetObj, fromFediUser=fromUserObj).count() != 0: # pylint: disable=no-member
-            # to-do: reject
-            pass
-        else:
+        if not Follow.objects.filter(target=targetObj, fromFediUser=fromUserObj).count() != 0: # pylint: disable=no-member
             newFollow = Follow(
                 target=targetObj,
                 fromFediUser=fromUserObj,
                 is_pending=False
             )
             newFollow.save()
-            APSend.delay(
-                fromUserObj.Inbox,
+        
+        APSend.delay(
+            fromUserObj.Inbox,
+            targetObj.username,
+            RenderAccept(
                 targetObj.username,
-                RenderAccept(
-                    targetObj.username,
-                    body
-                )
+                body
             )
+        )
         return HttpResponse(status=202)
     else:
         try:
             unFollow = Follow.objects.get(target=targetObj, fromFediUser=fromUserObj) # pylint: disable=no-member
-        except ObjectDoesNotExist:
-            APSend.delay(
-                fromUserObj.Inbox,
-                targetObj.username,
-                RenderUndo(
-                    targetObj.username,
-                    body["object"]
-                )
-            )
-        else:
-            APSend.delay(
-                fromUserObj.Inbox,
-                targetObj.username,
-                RenderUndo(
-                    targetObj.username,
-                    body["object"]
-                )
-            )
             unFollow.delete()
+        except ObjectDoesNotExist:
+            pass
+        APSend.delay(
+            fromUserObj.Inbox,
+            targetObj.username,
+            RenderUndo(
+                targetObj.username,
+                body["object"]
+            )
+        )
         return HttpResponse(status=202)
