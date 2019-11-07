@@ -133,8 +133,10 @@ def InboxUser(request, username):
     elif apbody["type"] == "Undo":
         if apbody["object"]["type"] == "Follow":
             return _FollowActivity(apbody, fromUser, target, True)
-        if apbody["object"]["type"] == "Like":
+        elif apbody["object"]["type"] == "Like":
             return _LikeActivity(apbody, fromUser, target, True)
+        elif apbody["object"]["type"] == "Block":
+            return _BlockActivity(apbody, fromUser, target, True)
 
     return HttpResponse(status=501)
     
