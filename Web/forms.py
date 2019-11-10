@@ -29,5 +29,10 @@ class EditProfileForm(forms.ModelForm):
         description = markdown.Markdown().convert(description)
         return description
 
+class EditPrivacyForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('is_manualFollow', )
+
 class Settings_PasswordChangeForm(PasswordChangeForm):
     pass

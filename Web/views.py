@@ -18,7 +18,7 @@ from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
-from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm
+from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm, EditPrivacyForm
 from .lib import isAPHeader, render_NPForm, panigateQuery, scraping, getProfWF
 
 # Create your views here.
@@ -332,3 +332,19 @@ def settings_deleteAccountDone(request):
         return HttpResponseNotAllowed("POST")
     
     logout(request)
+
+def settings_privacy(request):
+    if request.method == "POST":
+        form = EditPrivacyForm(request.POST)
+        if form.is_valid():
+            request.user.is_manualFollow = form.cleaned_data["is_manualFollow"]
+            request.user.save()
+            return HttpResponse(status=204)
+        else:
+            return HttpResponseBadRequest()
+    else:
+        return render_NPForm(request, "settings/privacy.html", {"profileForm": 
+            EditPrivacyForm({
+                "is_manualFollow": request.user.is_manualFollow
+            })
+        })

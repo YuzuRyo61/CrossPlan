@@ -1,0 +1,18 @@
+{% extends 'settings/__head.html' %}
+
+{% block title %}プライバシー設定 | CrossPlan{% endblock %}
+
+{% block side %}
+<h2 class="ui header">プライバシー設定</h2>
+<hr>
+<form method="POST" class="ui large form" action="{% url 'Settings_Privacy' %}" id="settingForm" onsubmit="return false;">
+    <div class="field">
+        <div class="ui checkbox">
+            {{ profileForm.is_manualFollow }}
+            <label>フォローを手動で承認します</label>
+        </div>
+    </div>
+    {% csrf_token %}
+    <button id="settingFormSubmit" type="submit" class="ui button primary fluid">保存</button>
+</form>
+{% endblock %}

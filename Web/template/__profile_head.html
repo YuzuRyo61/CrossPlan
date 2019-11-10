@@ -54,8 +54,9 @@
             {% endif %}
             <div class="ui segment">
                 <div>
-                    {% if targetUserRelation.followed %}<div class="ui green label">フォローされています</div>{% endif %}
                     {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
+                    {% if targetUser.is_manualFollow %}<div class="ui red label">フォロー承認が必要</div>{% endif %}
+                    {% if targetUserRelation.followed %}<div class="ui green label">フォローされています</div>{% endif %}
                     {% if targetUserRelation.followPending %}<div class="ui orange label">フォロー処理中</div>{% endif %}
                 </div>
                 <div>
