@@ -20,6 +20,8 @@ from fediverse.views.inboxProcess.Announce import _AnnounceActivity
 from fediverse.views.inboxProcess.DeletePost import _DeletePostActivity
 from fediverse.views.inboxProcess.Block import _BlockActivity
 
+from fediverse.views.renderer.activity.Reject import RenderReject
+
 from fediverse.models import User, FediverseUser, Follow, BlackDomain
 
 from fediverse.lib import registerFediUser, isAPContext, parse_signature
@@ -47,21 +49,12 @@ def InboxUser(request, username):
 
     try:
         apbody = json.loads(request.body.decode('utf-8'))
+        apbody.pop("@context")
     except json.JSONDecodeError:
         return HttpResponseBadRequest()
 
     if not isAPContext(apbody):
         return HttpResponseBadRequest()
-
-    for bd in BlackDomain.objects.all(): # pylint: disable=no-member
-        if host.netloc == bd.targetDomain:
-            logging.warn(f"ActivityPub Received, but it is blacklisted domain: {host.netloc}")
-            return HttpResponse(status=202)
-
-    logging.info("ActivityPub Recieved: ")
-    logging.info(pformat(apbody))
-
-    apbody.pop("@context")
 
     try:
         fromUser = FediverseUser.objects.get(Uri=apbody["actor"]) # pylint: disable=no-member
@@ -75,7 +68,33 @@ def InboxUser(request, username):
             
     if fromUser.is_suspended == True:
         logging.warn("This user is suspended in this server.")
+        if apbody["type"] == "Follow":
+            APSend.delay(
+                fromUser.Inbox,
+                target.username,
+                RenderReject(
+                    target.username,
+                    apbody["object"]
+                )
+            )
         return HttpResponse(status=202)
+
+    for bd in BlackDomain.objects.all(): # pylint: disable=no-member
+        if host.netloc == bd.targetDomain:
+            logging.warn(f"ActivityPub Received, but it is blacklisted domain: {host.netloc}")
+            if apbody["type"] == "Follow":
+                APSend.delay(
+                    fromUser.Inbox,
+                    target.username,
+                    RenderReject(
+                        target.username,
+                        apbody["object"]
+                    )
+                )
+            return HttpResponse(status=202)
+
+    logging.info("ActivityPub Recieved: ")
+    logging.info(pformat(apbody))
 
     if apbody.get("type") == None or type(apbody.get("type")) != str:
         return HttpResponseBadRequest()
