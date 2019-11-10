@@ -92,7 +92,7 @@ class FediverseUser(models.Model):
 
 class Post(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    fediID = models.CharField(max_length=256, blank=True, null=True)
+    fediID = models.URLField(max_length=256, blank=True, null=True, unique=True)
     body = models.TextField(blank=True, null=True)
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
     parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
