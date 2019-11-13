@@ -5,6 +5,8 @@ import requests
 import markdown
 import logging
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from pprint import pformat
 
 from fediverse.models import Post, User
@@ -34,3 +36,37 @@ def APSend(targetUrl, fromUser, dct):
         logging.warn("APSend was failed. It will be try to retry.")
         raise APSend.retry()
     return res.status_code
+
+@shared_task
+def AccountDeletion(username):
+    try:
+        target = User.objects.get(username__iexact=username)
+    except ObjectDoesNotExist:
+        logging.error("Targetted username is not found.")
+        raise ValueError("Targetted username is not found.")
+
+    for post in target.posts.all():
+        logging.info(f"Delete post: {str(post.uuid)}")
+        post.delete()
+    
+    for following in target.following.all():
+        logging.info(f"Delete following: {str(following.uuid)}")
+        following.delete()
+    
+    for followers in target.followers.all():
+        logging.info(f"Delete follower: {str(followers.uuid)}")
+        followers.delete()
+    
+    for liked in target.liked.all():
+        logging.info(f"Delete liked: {str(liked.uuid)}")
+        liked.delete()
+
+    for blocking in target.blocking.all():
+        logging.info(f"Delete blocking: {str(blocking.uuid)}")
+        blocking.delete()
+
+    for blocked in target.blocked.all():
+        logging.info(f"Deleteblocked: {str(blocked.uuid)}")
+        blocked.delete()
+    
+    return True

@@ -14,6 +14,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import logout
 from django.views.generic import CreateView
 
+from CrossPlan.tasks import AccountDeletion
+
 from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel
 from fediverse.lib import registerFediUser
 from fediverse.views.renderer.actor.Person import RenderUser
@@ -357,6 +359,7 @@ def settings_deleteAccountDone(request):
     if not request.user.is_superuser:
         request.user.is_active = False
         request.user.save()
+        AccountDeletion.delay(request.user.username)
         logout(request)
         return render_NPForm(request, "settings/delete_account_done.html")
     else:
