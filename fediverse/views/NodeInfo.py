@@ -26,7 +26,7 @@ def NodeInfo(request):
             "inbound": [],
             "outbound": []
         },
-        "openRegistrations": False,
+        "openRegistrations": bool(settings.CP_OPENREGISTER),
         "usage": {
             "users": {
                 "total": User.objects.filter(is_active=True).count(),
