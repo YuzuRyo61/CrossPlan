@@ -1,9 +1,14 @@
 import markdown
 
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 from django import forms
 
 from fediverse.models import Post, User
+
+class RegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ("username", )
 
 class LoginForm(AuthenticationForm):
     pass

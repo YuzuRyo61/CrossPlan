@@ -52,6 +52,9 @@
                     </div>
                 </div>
                 {% else %}
+                {% if CP_OPENREGISTER %}
+                <a class="item right" href="{% url 'Register' %}">登録</a>
+                {% endif %}
                 <a class="item right" href="{% url 'Login' %}">ログイン</a>
                 {% endif %}
             </div>

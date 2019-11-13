@@ -15,6 +15,7 @@ import socket
 import logging
 from dotenv import load_dotenv
 from distutils.version import LooseVersion
+from distutils.util import strtobool
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -184,3 +185,5 @@ LOGIN_REDIRECT_URL = "INDEX"
 OBJECT_PER_PAGE = 20
 
 USER_PER_PAGE = 10
+
+CP_OPENREGISTER = strtobool(os.environ.get('CP_OPENREGISTER', "true"))

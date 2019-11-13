@@ -29,5 +29,11 @@
     <p>CrossPlanとは、Python及びWebフレームワークのDjangoを使用して作成されたSNSです。</p>
     <p>また、W3C勧告の<a href="https://activitypub.rocks/" target="_blank">ActivityPub</a>に準拠して作られたSNSのため、この規格に対応したソフトウェアであればあらゆるサーバーから情報を受け取ることができます。</p>
 </div>
+{% if CP_OPENREGISTER %}
+<a class="ui button primary fluid" href="{% url 'Register' %}">始めましょう</a>
+<br>
+<a class="ui button fluid" href="{% url 'Login' %}">アカウントをお持ちですか？</a>
+{% else %}
 <a class="ui button primary fluid" href="{% url 'Login' %}">始めましょう（ログイン）</a>
+{% endif %}
 {% endblock %}

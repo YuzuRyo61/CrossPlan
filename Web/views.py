@@ -3,14 +3,16 @@ import html2markdown
 import markdown
 
 from django.conf import settings
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, HttpResponseGone, Http404
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import logout
+from django.views.generic import CreateView
 
 from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel
 from fediverse.lib import registerFediUser
@@ -18,10 +20,28 @@ from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
-from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm, EditPrivacyForm
+from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm, EditPrivacyForm, RegisterForm
 from .lib import isAPHeader, render_NPForm, panigateQuery, scraping, getProfWF
 
 # Create your views here.
+class RegisterView(CreateView):
+    def post(self, request, *args, **kwargs):
+        if not settings.CP_OPENREGISTER:
+            return HttpResponseForbidden()
+        form = RegisterForm(data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect("/")
+        else:
+            return render_NPForm(request, "register.html", {"form": form})
+        
+    def get(self, request, *args, **kwargs):
+        if not settings.CP_OPENREGISTER:
+            return HttpResponseForbidden()
+        form = RegisterForm()
+        return render_NPForm(request, "register.html", {"form": form})
+
 class LoginView(LoginView): # pylint: disable=function-redefined
     form_class = LoginForm
     template_name = "login.html"
