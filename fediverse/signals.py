@@ -78,6 +78,10 @@ def postFollow(sender, instance, created, **kwargs):
                 instance.targetFedi.Uri
             ))
         )
+    elif created and instance.fromUser != None and instance.target != None:
+        if not instance.target.is_manualFollow:
+            instance.is_pending = False
+            instance.save()
 
 @receiver(pre_delete, sender=Follow)
 def preUnFollow(sender, instance, using, **kwargs):
