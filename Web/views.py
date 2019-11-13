@@ -307,6 +307,8 @@ def postDelete(request):
 
 def postDetail(request, uuid):
     post = get_object_or_404(PostModel, uuid=uuid)
+    if post.parent != None and post.parent.is_active == False:
+        return HttpResponseGone()
     obj = {"post": post}
     if post.announceTo == None:
         obj.update({"scraped_body": scraping(post.body)})
@@ -347,11 +349,18 @@ class settings_PasswordDone(PasswordChangeDoneView):
 def settings_deleteAccount(request):
     return render_NPForm(request, "settings/delete_account.html")
 
+@login_required
 def settings_deleteAccountDone(request):
     if request.method != "POST":
         return HttpResponseNotAllowed("POST")
     
-    logout(request)
+    if not request.user.is_superuser:
+        request.user.is_active = False
+        request.user.save()
+        logout(request)
+        return render_NPForm(request, "settings/delete_account_done.html")
+    else:
+        return HttpResponseForbidden()
 
 def settings_privacy(request):
     if request.method == "POST":

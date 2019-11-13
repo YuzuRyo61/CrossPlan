@@ -17,6 +17,43 @@
     <li>フォロー・フォロワーが全て失われます。</li>
     <li>削除を実施すると即座に削除されます。復旧猶予期間はありません。</li>
 </ul>
-<button class="ui button negative fluid"><i class="trash icon"></i> アカウントを削除</button>
+<button class="ui button negative fluid" id="finalDeleteConfirmBtn"><i class="trash icon"></i> アカウントを削除</button>
+<div class="ui basic modal" id="finalDeleteConfirm">
+    <div class="ui icon header">
+    <i class="trash icon"></i>
+    アカウントの削除
+    </div>
+    <div class="content">
+    <p>本当に削除しますか？</p>
+    </div>
+    <div class="actions">
+    <div class="ui basic cancel inverted button">
+        <i class="remove icon"></i>
+        No
+    </div>
+    <div class="ui red ok inverted button">
+        <i class="trash icon"></i>
+        Yes
+    </div>
+    </div>
+</div>
+<form method="POST" action="{% url 'Settings_DeleteAccountDone' %}" name="deleteConfirmForm">
+    {% csrf_token %}
+</form>
 {% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+$('#finalDeleteConfirmBtn').click(function () {
+    $('#finalDeleteConfirm')
+        .modal({
+            blurring: true,
+            onApprove : function() {
+                document.deleteConfirmForm.submit()
+            }
+        })
+        .modal('show')
+})
+</script>
 {% endblock %}
