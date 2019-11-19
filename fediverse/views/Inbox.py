@@ -42,6 +42,7 @@ def InboxUser(request, username):
     if request.META.get("CONTENT_TYPE").startswith("application/activity+json") or request.META.get("CONTENT_TYPE").startswith("application/ld+json"):
         pass
     else:
+        logging.warn("Content-Type is not ActivityPub")
         return HttpResponseBadRequest()
 
     signature = parse_signature(request.META.get("HTTP_SIGNATURE"))
@@ -49,12 +50,15 @@ def InboxUser(request, username):
 
     try:
         apbody = json.loads(request.body.decode('utf-8'))
-        apbody.pop("@context")
     except json.JSONDecodeError:
+        logging.error("JSON decode error")
         return HttpResponseBadRequest()
 
     if not isAPContext(apbody):
+        logging.error("It is not ActivityPub content")
         return HttpResponseBadRequest()
+
+    apbody.pop("@context")
 
     try:
         fromUser = FediverseUser.objects.get(Uri=apbody["actor"]) # pylint: disable=no-member
