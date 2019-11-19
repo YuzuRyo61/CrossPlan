@@ -42,31 +42,14 @@ def AccountDeletion(username):
     try:
         target = User.objects.get(username__iexact=username)
     except ObjectDoesNotExist:
-        logging.error("Targetted username is not found.")
-        raise ValueError("Targetted username is not found.")
+        logging.error("Target username is not found.")
+        raise ValueError("Target username is not found.")
 
-    for post in target.posts.all():
-        logging.info(f"Delete post: {str(post.uuid)}")
-        post.delete()
-    
-    for following in target.following.all():
-        logging.info(f"Delete following: {str(following.uuid)}")
-        following.delete()
-    
-    for followers in target.followers.all():
-        logging.info(f"Delete follower: {str(followers.uuid)}")
-        followers.delete()
-    
-    for liked in target.liked.all():
-        logging.info(f"Delete liked: {str(liked.uuid)}")
-        liked.delete()
-
-    for blocking in target.blocking.all():
-        logging.info(f"Delete blocking: {str(blocking.uuid)}")
-        blocking.delete()
-
-    for blocked in target.blocked.all():
-        logging.info(f"Deleteblocked: {str(blocked.uuid)}")
-        blocked.delete()
+    target.posts.all().delete()
+    target.following.all().delete()
+    target.followers.all().delete()
+    target.liked.all().delete()
+    target.blocking.all().delete()
+    target.blocked.all().delete()
     
     return True
