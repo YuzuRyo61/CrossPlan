@@ -133,6 +133,13 @@ class Block(models.Model):
     fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocking", blank=True, null=True)
     fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="blocking", blank=True, null=True)
 
+class Mute(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="muted", blank=True, null=True)
+    targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="muted", blank=True, null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mute", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="mute", blank=True, null=True)
+
 class BlackDomain(models.Model):
     targetDomain = models.CharField(max_length=256, unique=True)
 
