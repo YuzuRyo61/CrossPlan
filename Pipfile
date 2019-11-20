@@ -76,6 +76,7 @@ Markdown = "*"
 PyHamcrest = "==1.9.0"
 Twisted = "==19.7.0"
 "zope.interface" = "==4.6.0"
+py-gfm = "*"
 
 [requires]
 python_version = "3.7"
