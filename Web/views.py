@@ -1,6 +1,5 @@
 import json
 import html2markdown
-import markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
@@ -22,7 +21,7 @@ from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
 from fediverse.views.renderer.response import APResponse
 
-from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm, EditPrivacyForm, RegisterForm
+from .forms import LoginForm, NewPostForm, EditProfileForm, Settings_PasswordChangeForm, EditPrivacyForm, RegisterForm, convertMarkdown
 from .lib import isAPHeader, render_NPForm, panigateQuery, scraping, getProfWF
 
 # Create your views here.
@@ -223,7 +222,7 @@ def newPost(request):
     if NewPostForm(request.POST).is_valid():
         newPostObj = PostModel(
             parent=request.user,
-            body=markdown.Markdown().convert(request.POST["body"])
+            body=convertMarkdown(request.POST["body"])
         )
         newPostObj.save()
         return HttpResponse(status=204)

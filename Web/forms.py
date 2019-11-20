@@ -1,9 +1,18 @@
 import markdown
+from gfm import AutolinkExtension
 
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 from django import forms
 
 from fediverse.models import Post, User
+
+def convertMarkdown(body):
+    return markdown.markdown(
+        body,
+        extensions=[
+            AutolinkExtension()
+        ]
+    )
 
 class RegisterForm(UserCreationForm):
     class Meta:
@@ -30,8 +39,7 @@ class EditProfileForm(forms.ModelForm):
         fields = ('display_name', 'description', 'is_bot')
 
     def clean_description(self):
-        description = self.cleaned_data['description']
-        description = markdown.Markdown().convert(description)
+        description = convertMarkdown(self.cleaned_data['description'])
         return description
 
 class EditPrivacyForm(forms.ModelForm):

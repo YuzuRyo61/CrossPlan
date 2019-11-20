@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from collections import OrderedDict
 import requests
-import markdown
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist

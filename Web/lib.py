@@ -1,6 +1,8 @@
 import requests
 import logging
+import markdown
 from bs4 import BeautifulSoup
+from gfm import AutolinkExtension
 
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
