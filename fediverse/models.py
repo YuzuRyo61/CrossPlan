@@ -125,6 +125,7 @@ class Like(models.Model):
     target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked", null=True)
     fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
     fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
 
 class Block(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

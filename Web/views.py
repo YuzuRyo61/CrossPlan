@@ -290,6 +290,12 @@ def favorite(request):
 
     return JsonResponse({"liked": Liked, "target": request.POST.get("target", None)})
 
+@login_required
+def likedPosts(request):
+    return render_NPForm(request, "likedPosts.html", {
+        "likedPosts": panigateQuery(request, [obj.target for obj in request.user.liked.all().order_by('created').reverse()], settings.OBJECT_PER_PAGE)
+    })
+
 def userState(request):
     if request.method != "POST":
         return HttpResponseNotAllowed("POST")
