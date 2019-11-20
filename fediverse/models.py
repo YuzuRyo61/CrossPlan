@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import RegexValidator
 
 from fediverse.lib import generate_key
 
@@ -40,7 +41,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         primary_key=True,
         max_length=16,
-        unique=True
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r"^[a-zA-Z0-9_]+$",
+                message='半角英数字とアンダーバーのみ使用できます。',
+                code='invalid_username'
+            )
+        ]
     )
     display_name = models.CharField(
         max_length=32,
@@ -66,6 +74,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"@{self.username}"
+
+class TombUser(models.Model):
+    username = models.CharField(max_length=16)
+    tomb_at = models.DateTimeField(auto_now_add=True)
 
 class FediverseUser(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
