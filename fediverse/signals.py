@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 from CrossPlan.tasks import APSend
 
-from .models import Post, Like, Follow
+from .models import Post, Like, Follow, Block
 from .views.renderer.head import APRender
 from .views.renderer.activity.Create import RenderCreate
 from .views.renderer.activity.Delete import RenderDelete
@@ -99,3 +99,12 @@ def preUnFollow(sender, instance, using, **kwargs):
                 )
             ))
         )
+
+@receiver(post_save, sender=Block)
+def postBlock(sender, instance, created, **kwargs):
+    if created and instance.targetFedi != None and instance.fromUser != None:
+        pass
+
+@receiver(pre_delete, sender=Block)
+def preUnblock(sender, instance, using, **kwargs):
+    pass

@@ -105,9 +105,12 @@
         {% endif %}
         {% block script %}{% endblock %}
         {% if user.is_authenticated %}
+        <form name="cp_posts" id="cp_posts" method="POST">
+            <input type="hidden" name="target" value="">
+            {% csrf_token %}
+        </form>
         <script type="text/javascript">
             window.isNewPostModalActive = false
-            window.CSRF_TOKEN = '{{ csrf_token }}'
             window.FAVORITE_LOC = '{% url "Favorite" %}'
             window.ANNOUNCE_LOC = '{% url "Announce" %}'
             window.IS_LOGIN = true

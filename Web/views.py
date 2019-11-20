@@ -4,7 +4,7 @@ import markdown
 
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, HttpResponseGone, Http404
+from django.http.response import HttpResponseNotAllowed, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, HttpResponseGone, Http404, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,7 +16,7 @@ from django.views.generic import CreateView
 
 from CrossPlan.tasks import AccountDeletion
 
-from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel
+from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel, Like as LikeModel
 from fediverse.lib import registerFediUser
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
@@ -235,11 +235,60 @@ def newPost(request):
 
 @login_required
 def announce(request):
-    pass
+    if request.method != "POST":
+        return HttpResponseNotAllowed("POST")
+
+    if request.POST.get("target", None) == None:
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "INVALID_FORM",
+            "msg": "対象の投稿が不明です。"
+        }}), content_type="application/json")
+    
+    try:
+        obj = PostModel.objects.get(uuid=request.POST.get("target", None)) # pylint: disable=no-member
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "POST_NOTFOUND",
+            "msg": "対象の投稿が見つかりません。"
+        }}), content_type="application/json")
+
+    newAnnounce = PostModel(
+        parent=request.user,
+        announceTo=obj
+    )
+    newAnnounce.save()
+
+    return HttpResponse(status=204)
 
 @login_required
 def favorite(request):
-    pass
+    if request.method != "POST":
+        return HttpResponseNotAllowed("POST")
+
+    if request.POST.get("target", None) == None:
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "INVALID_FORM",
+            "msg": "対象の投稿が不明です。"
+        }}), content_type="application/json")
+
+    try:
+        obj = PostModel.objects.get(uuid=request.POST.get("target", None)) # pylint: disable=no-member
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest(json.dumps({"error": {
+            "code": "POST_NOTFOUND",
+            "msg": "対象の投稿が見つかりません。"
+        }}), content_type="application/json")
+
+    try:
+        isExist = LikeModel.objects.get(target=obj, fromUser=request.user) # pylint: disable=no-member
+        isExist.delete()
+        Liked = False
+    except ObjectDoesNotExist:
+        newLike = LikeModel(target=obj, fromUser=request.user)
+        newLike.save()
+        Liked = True
+
+    return JsonResponse({"liked": Liked, "target": request.POST.get("target", None)})
 
 def userState(request):
     if request.method != "POST":

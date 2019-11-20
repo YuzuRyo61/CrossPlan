@@ -60,11 +60,21 @@
         <i class="linkify icon"></i>
     </a>
     {% if user.is_authenticated %}
+    {% if post.announceTo %}
+    <a class="ui icon item link" onclick="announce('{{ post.announceTo.uuid }}', this)" title="アナウンス">
+        <i class="retweet icon"></i>
+    </a>
+    <a class="ui icon item link" onclick="favorite('{{ post.announceTo.uuid }}', this)" title="お気に入り">
+        <i class="star icon"></i>
+    </a>
+    {% else %}
     <a class="ui icon item link" onclick="announce('{{ post.uuid }}', this)" title="アナウンス">
         <i class="retweet icon"></i>
     </a>
     <a class="ui icon item link" onclick="favorite('{{ post.uuid }}', this)" title="お気に入り">
         <i class="star icon"></i>
     </a>
+    {% endif %}
+
     {% endif %}
 </div>
