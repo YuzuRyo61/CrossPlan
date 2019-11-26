@@ -373,6 +373,30 @@ def postDetail(request, uuid):
     return render_NPForm(request, "postDetail.html", obj)
 
 @login_required
+def followApproval(request):
+    if not request.user.is_manualFollow:
+        return redirect(reverse("INDEX"))
+
+    if request.method == "POST":
+        if request.POST["target"] != None:
+            target = get_object_or_404(FollowModel, uuid=request.POST["target"], is_pending=True)
+            if request.POST["mode"] == "approve":
+                target.is_pending = False
+                target.save()
+                return HttpResponse(status=204)
+            elif request.POST["mode"] == "reject":
+                target.delete()
+                return HttpResponse(status=204)
+            else:
+                return HttpResponseBadRequest()
+        else:
+            return HttpResponseBadRequest()
+    else:
+        return render_NPForm(request, "followApproval.html", {
+            "pendingUsers": request.user.followers.filter(is_pending=True)
+        })
+
+@login_required
 def settings_profile(request):
     if request.method == "POST":
         form = EditProfileForm(request.POST)

@@ -62,6 +62,7 @@
     <p class="item"><i class="retweet icon"></i> {{ post.announced.count }}</p>
     <p class="item"><i class="star icon"></i> {{ post.liked.count }}</p>
 </div>
+{% if post.fediID %}<p><a href="{{ post.fediID }}" target="_blank">投稿元を表示</a></p>{% endif %}
 <hr>
 {% if user.is_authenticated %}
 <div class="ui buttons">

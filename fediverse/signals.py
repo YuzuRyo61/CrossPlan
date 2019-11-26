@@ -1,4 +1,5 @@
 import logging
+import json
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -13,6 +14,8 @@ from .views.renderer.head import APRender
 from .views.renderer.activity.Create import RenderCreate
 from .views.renderer.activity.Delete import RenderDelete
 from .views.renderer.activity.Follow import RenderFollow
+from .views.renderer.activity.Accept import RenderAccept
+from .views.renderer.activity.Reject import RenderReject
 from .views.renderer.activity.Undo import RenderUndo
 from .views.renderer.object.Note import RenderNote
 from .views.renderer.object.Tombstone import RenderTombstone
@@ -82,6 +85,17 @@ def postFollow(sender, instance, created, **kwargs):
         if not instance.target.is_manualFollow:
             instance.is_pending = False
             instance.save()
+    elif created == False and instance.fromFediUser != None and instance.target != None and instance.pendingObj != None:
+        APSend.delay(
+            instance.fromFediUser.Inbox,
+            instance.target.username,
+            APRender(RenderAccept(
+                instance.target.username,
+                json.loads(str(instance.pendingObj))
+            ))
+        )
+        instance.pendingObj = None
+        instance.save()
 
 @receiver(pre_delete, sender=Follow)
 def preUnFollow(sender, instance, using, **kwargs):
@@ -99,6 +113,16 @@ def preUnFollow(sender, instance, using, **kwargs):
                 )
             ))
         )
+    elif instance.fromFediUser != None and instance.is_pending == True:
+        APSend.delay(
+            instance.fromFediUser.Inbox,
+            instance.target.username,
+            APRender(RenderReject(
+                instance.target.username,
+                json.loads(instance.pendingObj)
+            ))
+        )
+
 
 @receiver(post_save, sender=Block)
 def postBlock(sender, instance, created, **kwargs):

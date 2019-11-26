@@ -1,0 +1,121 @@
+{% extends '__head.html' %}
+
+{% block title %}フォロー依頼 | CrossPlan{% endblock %}
+
+{% block body %}
+<h1>フォロー依頼</h1>
+<hr>
+{% for pendingUser in pendingUsers %}
+{% if pendingUser.fromUser %}
+<div class="ui segment" id="{{ pendingUser.uuid }}">
+    <h3 class="ui header">
+        {% if pendingUser.fromUser.display_name %}{{ pendingUser.fromUser.display_name }}{% else %}{{ pendingUser.fromUser.username }}{% endif %}
+        <div class="header sub"><a href="{% url 'UserShow' pendingUser.fromUser.username %}">@{{ pendingUser.fromUser.username }}</a></div>
+    </h3>
+    {{ pendingUser.fromUser.description|safe }}
+    <div class="ui buttons">
+        <button class="ui positive button fbtn" onclick="approve('{{ pendingUser.uuid }}')">承認</button>
+        <div class="or"></div>
+        <button class="ui negative button fbtn" onclick="reject('{{ pendingUser.uuid }}')">却下</button>
+    </div>
+</div>
+{% elif pendingUser.fromFediUser %}
+<div class="ui segment" id="{{ pendingUser.uuid }}">
+    <h3 class="ui header">
+        {% if pendingUser.fromFediUser.display_name %}{{ pendingUser.fromFediUser.display_name }}{% else %}{{ pendingUser.fromFediUser.username }}{% endif %}
+        <div class="header sub"><a href="{% url 'FediUserShow' pendingUser.fromFediUser.username pendingUser.fromFediUser.Host %}">@{{ pendingUser.fromFediUser.username }}@{{ pendingUser.fromFediUser.Host }}</a></div>
+    </h3>
+    {{ pendingUser.fromFediUser.description|safe }}
+    <div class="ui buttons">
+        <button class="ui positive button fbtn" onclick="approve('{{ pendingUser.uuid }}')">承認</button>
+        <div class="or"></div>
+        <button class="ui negative button fbtn" onclick="reject('{{ pendingUser.uuid }}')">却下</button>
+    </div>
+</div>
+{% endif %}
+<form method="POST" action="{% url 'FollowApproval' %}" name="FollowApprovalForm" id="FollowApprovalForm">
+    <input type="hidden" name="target" value="">
+    <input type="hidden" name="targetFedi" value="">
+    <input type="hidden" name="mode" value="">
+    {% csrf_token %}
+</form>
+{% empty %}
+<div class="ui icon message">
+    <i class="user icon"></i>
+    <div class="content">
+        <div class="header">フォロー承認待ちのユーザーはいません。</div>
+        <p>フォロー承認待ちがあるとこのページに表示されます。</p>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+function approve(target, isFedi) {
+    $('.fbtn')
+        .addClass('loading')
+        .addClass('disabled')
+    var ftg = document.FollowApprovalForm.elements['target']
+    var fmd = document.FollowApprovalForm.elements['mode']
+    fmd.value = 'approve'
+    ftg.value = target
+    let formValue = $('#FollowApprovalForm').serialize()
+    let action = $('#FollowApprovalForm').data('action')
+    $.post(action, formValue)
+        .done(function (data) {
+            var delTarget = document.getElementById(target)
+            delTarget.remove()
+        })
+        .fail(function () {
+            $.uiAlert({
+                textHead: '承認エラー',
+                text: '',
+                bgcolor: '#DB2828',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'remove circle',
+                time: 5,
+            })
+        })
+        .always(function () {
+            $('.fbtn')
+                .removeClass('loading')
+                .removeClass('disabled')
+        })
+}
+
+function reject(target, isFedi) {
+    $('.fbtn')
+        .addClass('loading')
+        .addClass('disabled')
+    var ftg = document.FollowApprovalForm.elements['target']    
+    var fmd = document.FollowApprovalForm.elements['mode']
+    fmd.value = 'reject'
+    ftg.value = target
+    let formValue = $('#FollowApprovalForm').serialize()
+    let action = $('#FollowApprovalForm').data('action')
+    $.post(action, formValue)
+        .done(function (data) {
+            var delTarget = document.getElementById(target)
+            delTarget.remove()
+        })
+        .fail(function () {
+            $.uiAlert({
+                textHead: '承認エラー',
+                text: '',
+                bgcolor: '#DB2828',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'remove circle',
+                time: 5,
+            })
+        })
+        .always(function () {
+            $('.fbtn')
+                .removeClass('loading')
+                .removeClass('disabled')
+        })
+}
+</script>
+{% endblock %}

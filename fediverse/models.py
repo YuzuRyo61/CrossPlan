@@ -131,6 +131,7 @@ class Follow(models.Model):
     fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
     fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
     is_pending = models.BooleanField(default=True)
+    pendingObj = models.TextField(blank=True, null=True)
 
 class Like(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

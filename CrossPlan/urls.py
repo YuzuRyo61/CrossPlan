@@ -31,6 +31,7 @@ urlpatterns = [
     path('user/<username>', WebViews.User, name="UserShow"),
     path('user/<username>/following', WebViews.UserFollowing, name="UserShowFollowing"),
     path('user/<username>/follower', WebViews.UserFollower, name="UserShowFollower"),
+    path('follow-approval', WebViews.followApproval, name="FollowApproval"),
     path('login', WebViews.LoginView.as_view(), name="Login"),
     path('logout', WebViews.LogoutView.as_view(), name="Logout"),
     path('register', WebViews.RegisterView.as_view(), name="Register"),

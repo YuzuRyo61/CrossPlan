@@ -1,3 +1,5 @@
+import json
+
 from django.http.response import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -15,18 +17,22 @@ def _FollowActivity(body, fromUserObj, targetObj, undo=False):
             newFollow = Follow(
                 target=targetObj,
                 fromFediUser=fromUserObj,
-                is_pending=False
+                is_pending=targetObj.is_manualFollow
             )
+            if targetObj.is_manualFollow:
+                newFollow.pendingObj = json.dumps(body)
             newFollow.save()
         
-        APSend.delay(
-            fromUserObj.Inbox,
-            targetObj.username,
-            RenderAccept(
+        if targetObj.is_manualFollow == False:
+            APSend.delay(
+                fromUserObj.Inbox,
                 targetObj.username,
-                body
+                RenderAccept(
+                    targetObj.username,
+                    body
+                )
             )
-        )
+
         return HttpResponse(status=202)
     else:
         try:

@@ -43,6 +43,9 @@
                     <div class="menu">
                         <a class="item" href="{% url 'UserShow' user.username %}">プロフィール</a>
                         <a class="item" href="{% url 'Liked_Posts' %}">いいねした投稿</a>
+                        {% if user.is_manualFollow %}
+                        <a class="item" href="{% url 'FollowApproval' %}">フォロー承認</a>
+                        {% endif %}
                         <a class="item" href="{% url 'Settings_Profile' %}">設定</a>
                         {% if user.is_staff %}
                         <div class="divider"></div>
