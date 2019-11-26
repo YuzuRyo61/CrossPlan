@@ -7,9 +7,9 @@
         {% endif %}
         <div class="sub header">
             {% if post.parent %}
-            @{{ post.parent.username }}
+            <a href="{% url 'UserShow' post.parent.username %}">@{{ post.parent.username }}</a>
             {% elif post.parentFedi %}
-            @{{ post.parentFedi.username }}@{{ post.parentFedi.Host }}
+            <a href="{% url 'FediUserShow' post.parentFedi.username post.parentFedi.Host %}">@{{ post.parentFedi.username }}@{{ post.parentFedi.Host }}</a>
             {% endif %}
         </div>
         <small>{{ post.posted }}</small>
