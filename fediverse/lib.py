@@ -112,7 +112,7 @@ def registerFediUser(uri):
             Url=res.get("url"),
             publicKey=publicKey,
             keyId=keyId,
-            is_manualFollow=res.get("manuallyApprovesFollowers")
+            is_manualFollow=res.get("manuallyApprovesFollowers", False)
         )
 
 def newPostFromObj(objUrl):
