@@ -1,17 +1,25 @@
 function openUserMuteModal() {
     $('#userMuteConfirm')
+        .modal({
+            onApprove: function () {
+                sendState('mute')
+            }
+        })
         .modal('show')
 }
 
 function openUserBlockModal() {
     $('#userBlockConfirm')
+        .modal({
+            onApprove: function () {
+                sendState('block')
+            }
+        })
         .modal('show')
 }
 
 function sendState(state) {
-    if (state == "follow") {
-        $("#followBtn").addClass("disabled loading")
-    }
+    $(".stateActionBtn").addClass("disabled loading")
     document.getElementById("changeState").value = state
     var userStateForm = $("#userStateForm").serialize()
     var postTarget = $("#userStateForm").attr('action')
@@ -19,7 +27,7 @@ function sendState(state) {
         .done(function (data) {
             $.uiAlert({
                 textHead: '受諾されました。',
-                text: '',
+                text: state,
                 bgcolor: '#19c3aa',
                 textcolor: '#fff',
                 position: 'bottom-left',
@@ -52,6 +60,6 @@ function sendState(state) {
             }
         })
         .always(function () {
-            $('#followBtn').removeClass("disabled loading")
+            $('.stateActionBtn').removeClass("disabled loading")
         })
 }

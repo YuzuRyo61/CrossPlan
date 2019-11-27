@@ -15,7 +15,7 @@ from django.views.generic import CreateView
 
 from CrossPlan.tasks import AccountDeletion
 
-from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel, Like as LikeModel
+from fediverse.models import User as UserModel, Post as PostModel, FediverseUser, Follow as FollowModel, Like as LikeModel, Mute as MuteModel, Block as BlockModel
 from fediverse.lib import registerFediUser
 from fediverse.views.renderer.actor.Person import RenderUser
 from fediverse.views.renderer.head import APRender
@@ -72,6 +72,8 @@ def User(request, username):
                     "followed": True if targetUser.following.filter(target=request.user, is_pending=False).count() else False,
                     "followPending": True if targetUser.followers.filter(fromUser=request.user, is_pending=True).count() else False,
                     "blocked": True if targetUser.blocking.filter(target=request.user).count() else False,
+                    "blocking": True if targetUser.blocked.filter(fromUser=request.user).count() else False,
+                    "muting": True if targetUser.muted.filter(fromUser=request.user).count() else False,
                 }
             })
         return render_NPForm(request, "profile.html", renderObj)
@@ -315,10 +317,15 @@ def userState(request):
     if state == "follow":
         if request.POST.get("target") != None:
             try:
-                existFollow = FollowModel.objects.get(fromUser=request.user, target=UserModel.objects.get(username__iexact=request.POST["target"])) # pylint: disable=no-member
+                existFollow = FollowModel.objects.get(fromUser=request.user, target=get_object_or_404(UserModel, username__iexact=request.POST["target"])) # pylint: disable=no-member
                 existFollow.delete()
                 isNewFollow = False
             except ObjectDoesNotExist:
+                if BlockModel.objects.filter(target=request.user, fromUser=get_object_or_404(UserModel, username__iexact=request.POST["target"])).count() > 0: # pylint: disable=no-member
+                    return HttpResponseForbidden(json.dumps({"error": {
+                        "code": "YOU_ARE_BLOCKED",
+                        "msg": "このユーザーにブロックされています。"
+                    }}))
                 newFollow = FollowModel(
                     fromUser=request.user,
                     target=get_object_or_404(UserModel, username__iexact=request.POST["target"])
@@ -326,10 +333,15 @@ def userState(request):
                 isNewFollow = True
         elif request.POST.get("targetFedi") != None:
             try:
-                existFollow = FollowModel.objects.get(fromUser=request.user, targetFedi=FediverseUser.objects.get(uuid=request.POST["targetFedi"])) # pylint: disable=no-member
+                existFollow = FollowModel.objects.get(fromUser=request.user, targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])) # pylint: disable=no-member
                 existFollow.delete()
                 isNewFollow = False
             except ObjectDoesNotExist:
+                if BlockModel.objects.filter(target=request.user, fromFediUser=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])).count() > 0: # pylint: disable=no-member
+                    return HttpResponseForbidden(json.dumps({"error": {
+                        "code": "YOU_ARE_BLOCKED",
+                        "msg": "このユーザーにブロックされています。"
+                    }}))
                 newFollow = FollowModel(
                     fromUser=request.user,
                     targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])
@@ -343,6 +355,83 @@ def userState(request):
         
         if isNewFollow:
             newFollow.save()
+        return HttpResponse(status=204)
+    elif state == "mute":
+        if request.POST.get("target") != None:
+            try:
+                existMute = MuteModel.objects.get(fromUser=request.user, target=UserModel.objects.get(username__iexact=request.POST["target"])) # pylint: disable=no-member
+                existMute.delete()
+                isNewMute = False
+            except ObjectDoesNotExist:
+                newMute = MuteModel(
+                    fromUser=request.user,
+                    target=get_object_or_404(UserModel, username__iexact=request.POST["target"])
+                )
+                isNewMute = True
+        elif request.POST.get("targetFedi") != None:
+            try:
+                existMute = MuteModel.objects.get(fromUser=request.user, targetFedi=FediverseUser.objects.get(uuid=request.POST["targetFedi"])) # pylint: disable=no-member
+                existMute.delete()
+                isNewMute = False
+            except ObjectDoesNotExist:
+                newMute = MuteModel(
+                    fromUser=request.user,
+                    targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])
+                )
+                isNewMute = True
+        else:
+            return HttpResponseBadRequest(json.dumps({"error": {
+                "code": "INVALID_FORM",
+                "msg": "ターゲットが不明です"
+            }}))
+
+        if isNewMute:
+            newMute.save()
+        
+        return HttpResponse(status=204)
+    
+    elif state == "block":
+        if request.POST.get("target") != None:
+            try:
+                existBlock = BlockModel.objects.get(fromUser=request.user, target=get_object_or_404(UserModel, username__iexact=request.POST["target"])) # pylint: disable=no-member
+                existBlock.delete()
+                isNewBlock = False
+            except ObjectDoesNotExist:
+                if FollowModel.objects.filter(target=request.user, fromUser=get_object_or_404(UserModel, username__iexact=request.POST["target"])).count() > 0: # pylint: disable=no-member
+                    FollowModel.objects.get(target=request.user, fromUser=get_object_or_404(UserModel, username__iexact=request.POST["target"])).delete() # pylint: disable=no-member
+
+                if FollowModel.objects.filter(fromUser=request.user, target=get_object_or_404(UserModel, username__iexact=request.POST["target"])).count() > 0: # pylint: disable=no-member
+                    FollowModel.objects.get(fromUser=request.user, target=get_object_or_404(UserModel, username__iexact=request.POST["target"])).delete() # pylint: disable=no-member
+                newBlock = BlockModel(
+                    fromUser=request.user,
+                    target=get_object_or_404(UserModel, username__iexact=request.POST["target"])
+                )
+                isNewBlock = True
+        elif request.POST.get("targetFedi") != None:
+            try:
+                existBlock = BlockModel.objects.get(fromUser=request.user, targetFedi=FediverseUser.objects.get(uuid=request.POST["targetFedi"])) # pylint: disable=no-member
+                existBlock.delete()
+                isNewBlock = False
+            except ObjectDoesNotExist:
+                if FollowModel.objects.filter(target=request.user, fromFediUser=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])).count() > 0: # pylint: disable=no-member
+                    FollowModel.objects.get(target=request.user, fromFediUser=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])).delete() # pylint: disable=no-member
+
+                if FollowModel.objects.filter(fromUser=request.user, targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])).count() > 0: # pylint: disable=no-member
+                    FollowModel.objects.get(fromUser=request.user, targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])).delete() # pylint: disable=no-member
+                newBlock = BlockModel(
+                    fromUser=request.user,
+                    targetFedi=get_object_or_404(FediverseUser, uuid=request.POST["targetFedi"])
+                )
+                isNewBlock = True
+        else:
+            return HttpResponseBadRequest(json.dumps({"error": {
+                "code": "INVALID_FORM",
+                "msg": "ターゲットが不明です"
+            }}))
+
+        if isNewBlock:
+            newBlock.save()
+        
         return HttpResponse(status=204)
 
     return HttpResponse(json.dumps({"error": {
