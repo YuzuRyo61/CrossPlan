@@ -57,9 +57,11 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'channels',
     'django_admin_listfilter_dropdown',
+    'rest_framework',
     # Projects
     'fediverse',
-    'Web'
+    'Web',
+    'restAPI',
 ]
 
 MIDDLEWARE = [

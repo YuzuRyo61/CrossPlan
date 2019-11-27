@@ -19,6 +19,7 @@ from django.urls import path, include
 from Web import views as WebViews
 from fediverse.views.WebFinger import WebFinger_HostMeta, WebFinger_res
 from fediverse.views.NodeInfo import NodeInfo, NodeInfo_wk
+from restAPI.urls import router as restAPI_router
 
 urlpatterns = [
     path('', WebViews.INDEX, name="INDEX"),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('.well-known/webfinger', WebFinger_res),
     path('.well-known/nodeinfo', NodeInfo_wk),
     path('nodeinfo/2.0', NodeInfo, name="NodeInfo"),
+    path('api/', include(restAPI_router.urls)),
     path('AP/', include('fediverse.urls')),
     path('user/<username>', WebViews.User, name="UserShow"),
     path('user/<username>/following', WebViews.UserFollowing, name="UserShowFollowing"),
