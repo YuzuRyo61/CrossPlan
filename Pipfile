@@ -27,6 +27,8 @@ channels = "*"
 channels-redis = "*"
 redis = "*"
 py-gfm = "*"
+django-oauth-toolkit = "*"
+django-cors-headers = "*"
 
 [requires]
 python_version = "3.7"

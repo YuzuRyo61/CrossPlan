@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'channels',
     'django_admin_listfilter_dropdown',
     'rest_framework',
+    'oauth2_provider',
+    'corsheaders',
     # Projects
     'fediverse',
     'Web',
@@ -72,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'CrossPlan.urls'
@@ -189,3 +192,18 @@ OBJECT_PER_PAGE = 20
 USER_PER_PAGE = 10
 
 CP_OPENREGISTER = strtobool(os.environ.get('CP_OPENREGISTER', "true"))
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': {
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    }
+}
+
+OAUTH2_PROVIDER = {
+    'SCOPES': {
+        'read': 'Read scope',
+        'write': 'Write scope'
+    }
+}

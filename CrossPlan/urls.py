@@ -30,6 +30,7 @@ urlpatterns = [
     path('nodeinfo/2.0', NodeInfo, name="NodeInfo"),
     path('api/', include(restAPI_router.urls)),
     path('AP/', include('fediverse.urls')),
+    path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('user/<username>', WebViews.User, name="UserShow"),
     path('user/<username>/following', WebViews.UserFollowing, name="UserShowFollowing"),
     path('user/<username>/follower', WebViews.UserFollower, name="UserShowFollower"),
