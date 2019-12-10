@@ -1,9 +1,15 @@
 import uuid
 
+from bs4 import BeautifulSoup
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import RegexValidator
 
 from fediverse.lib import generate_key
+
+def scraping(text):
+    return BeautifulSoup(text, features="html.parser").get_text()
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -35,7 +41,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         primary_key=True,
         max_length=16,
-        unique=True
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex=r"^[a-zA-Z0-9_]+$",
+                message='半角英数字とアンダーバーのみ使用できます。',
+                code='invalid_username'
+            )
+        ]
     )
     display_name = models.CharField(
         max_length=32,
@@ -48,6 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_silence = models.BooleanField(default=False)
     is_suspended = models.BooleanField(default=False)
+    is_manualFollow = models.BooleanField(default=False)
     registered = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     publicKey = models.TextField(blank=True, editable=False)
@@ -61,12 +75,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"@{self.username}"
 
+class TombUser(models.Model):
+    username = models.CharField(max_length=16)
+    tomb_at = models.DateTimeField(auto_now_add=True)
+
 class FediverseUser(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=64)
-    name = models.CharField(max_length=128, blank=True, null=True)
+    display_name = models.CharField(max_length=128, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     Host = models.URLField()
+    is_bot = models.BooleanField(default=False)
     Inbox = models.URLField(blank=True, null=True)
     Outbox = models.URLField(blank=True, null=True)
     SharedInbox = models.URLField(blank=True, null=True)
@@ -76,24 +95,67 @@ class FediverseUser(models.Model):
     Uri = models.URLField(blank=True, null=True)
     Url = models.URLField(blank=True, null=True)
     publicKey = models.TextField(blank=True, null=True)
+    keyId = models.CharField(max_length=512, blank=True, null=True)
+    is_suspended = models.BooleanField(default=False)
+    is_manualFollow = models.BooleanField(default=False)
 
     def __str__(self):
         return f"@{self.username}@{self.Host}"
 
 class Post(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    fediID = models.URLField(max_length=256, blank=True, null=True, unique=True)
     body = models.TextField(blank=True, null=True)
     parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
     parentFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="posts", blank=True, null=True)
-    announceTo = models.TextField(blank=True, null=True)
-    replyTo = models.TextField(blank=True, null=True)
+    announceTo = models.ForeignKey("self", on_delete=models.CASCADE, related_name="announced", blank=True, null=True)
+    replyTo = models.ForeignKey("self", on_delete=models.CASCADE, related_name="replies", blank=True, null=True)
     posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ('-posted', )
+    
+    def __str__(self):
+        if self.parent != None:
+            parent = self.parent
+        elif self.parentFedi != None:
+            parent = self.parentFedi
+        else:
+            parent = "[UNKNOWN]"
+        return f"{scraping(self.body)} - {parent}"
+
+class Follow(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers", blank=True, null=True)
+    targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="followers", blank=True, null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="following", blank=True, null=True)
+    is_pending = models.BooleanField(default=True)
+    pendingObj = models.TextField(blank=True, null=True)
 
 class Like(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked"),
-    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked")
-    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked")
+    target = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked", null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="liked", blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+class Block(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocked", blank=True, null=True)
+    targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="blocked", blank=True, null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocking", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="blocking", blank=True, null=True)
+
+class Mute(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="muted", blank=True, null=True)
+    targetFedi = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="muted", blank=True, null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mute", blank=True, null=True)
+    fromFediUser = models.ForeignKey(FediverseUser, on_delete=models.CASCADE, related_name="mute", blank=True, null=True)
+
+class BlackDomain(models.Model):
+    targetDomain = models.CharField(max_length=256, unique=True)
+
+    def __str__(self):
+        return self.targetDomain

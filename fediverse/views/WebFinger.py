@@ -24,25 +24,25 @@ def WebFinger_res(request):
     subject = request.GET.get('resource')
     if subject == None:
         return HttpResponseNotFound()
-    elif settings.CP_ENDPOINT != request.get_host():
-        return HttpResponseBadRequest()
     else:
-        subject_parse = re.search(r"acct:(.+)@(.+)", subject)
+        subject_parse = re.search(r"^acct:(.+)@(.+)$", subject)
         if subject_parse == None:
             return HttpResponseNotFound()
-        userInfo = get_object_or_404(UserModel, username__iexact=subject_parse.group(1))
+        userInfo = get_object_or_404(UserModel, username__iexact=subject_parse.group(1), is_active=True)
+        if settings.CP_ENDPOINT != subject_parse.group(2):
+            return HttpResponseNotFound()
         return HttpResponse(json.dumps({
-            "subject": "acct:" + userInfo.username + "@" + subject_parse.group(2),
+            "subject": "acct:" + userInfo.username + "@" + settings.CP_ENDPOINT,
             "links": [
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": "https://" + settings.CP_ENDPOINT + "/user/" + userInfo.username
+                    "href": f"https://{settings.CP_ENDPOINT}/user/{userInfo.username}"
                 },
                 {
                     "rel": "http://webfinger.net/rel/profile-page",
                     "type": "text/html",
-                    "href": "https://" + settings.CP_ENDPOINT + "/user/" + userInfo.username
+                    "href": f"https://{settings.CP_ENDPOINT}/user/{userInfo.username}"
                 }
             ]
         }, ensure_ascii=False),

@@ -1,0 +1,46 @@
+{% extends '__profile_head.html' %}
+
+{% block title %}{% if isFediverseUser %}🌏 {% endif %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}のフォローリスト | CrossPlan{% endblock %}
+
+{% block side %}
+    {% for following in targetUserFollowing %}
+    {% include 'module/usercard_following.html' with userCard=following %}
+    {% if forloop.last %}
+    <div class="ui centered grid">
+        <div class="center aligned column">
+            <div class="ui pagination menu">
+                {% if targetUserFollowing.has_previous %}
+                <a class="item" href="?page={{ targetUserFollowing.previous_page_number }}">前へ</a>
+                {% else %}
+                <div class="disabled item">前へ</div>
+                {% endif %}
+                {% for link_page in targetUserFollowing.paginator.page_range %}
+                    {% if link_page %}
+                        {% if link_page == targetUserFollowing.number %}
+                        <a class="active item" href="#">{{ link_page }}</a>
+                        {% else %}
+                        <a class="item" href="?page={{ link_page }}">{{ link_page }}</a>
+                        {% endif %}
+                    {% else %}
+                    <div class="disabled item">...</div>
+                    {% endif %}
+                {% endfor %}
+                {% if targetUserFollowing.has_next %}
+                <a class="item" href="?page={{ targetUserFollowing.next_page_number }}">次へ</a>
+                {% else %}
+                <div class="disabled item">次へ</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% empty %}
+    <div class="ui icon message">
+        <i class="user icon"></i>
+        <div class="content">
+            <div class="header">フォローなし</div>
+            <p>誰もフォローしていません。</p>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

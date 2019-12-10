@@ -1,0 +1,199 @@
+{% extends '__head.html' %}
+{% load static %}
+
+{% block title %}{% if isFediverseUser %}🌏 {% endif %}{% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %} | CrossPlan{% endblock %}
+
+{% block body %}
+<h1 class="ui header">
+    {% if targetUser.display_name %}{{ targetUser.display_name }}{% else %}{{ targetUser.username }}{% endif %}
+    <div class="sub header">@{{ targetUser.username }}{% if isFediverseUser %}@{{ targetUser.Host }}{% endif %}</div>
+</h1>
+<hr>
+    <div class="ui stackable grid">
+        <div class="four wide column">
+            {% if isFediverseUser %}
+            <div class="ui warning message">
+                <div class="header">このユーザーは連合ユーザーです。</div>
+                <p>このユーザーは連合ユーザーであり、最新のプロフィールでない可能性があります。</p>
+                <a target="_blank" href="{{ targetUser.Url }}">連合先のユーザーのプロフィールを見る</a>
+            </div>
+            {% endif %}
+            {% if targetUser == user %}
+            <a class="ui button fluid" href="{% url 'Settings_Profile' %}"><i class="pencil alternate icon"></i> プロフィールを編集</a>
+            {% elif user.is_authenticated %}
+            {% if not targetUserRelation.blocking %}
+                {% if targetUserRelation.following %}
+                <button class="ui button secondary fluid stateActionBtn" onclick="sendState('follow')"><i class="user times icon"></i> フォロー解除</button>
+                {% else %}
+                <button class="ui button primary fluid stateActionBtn" {% if not targetUserRelation.blocked %}onclick="sendState('follow')"{% else %}disabled{% endif %}><i class="user plus icon"></i> フォロー</button>
+                {% endif %}
+            {% endif %}
+            <div class="ui accordion">
+                <div class="title"><i class="dropdown icon"></i> その他のリレーションアクション </div>
+                <div class="content">
+                    <button class="ui button orange fluid stateActionBtn" id="muteBtn" onclick="openUserMuteModal()"><i class="mute icon"></i> ミュート</button>
+                    <br>
+                    <button class="ui button negative fluid stateActionBtn" id="muteBtn" onclick="openUserBlockModal()"><i class="ban icon"></i> ブロック</button>
+                </div>
+            </div>
+            <form method="POST" action="{% url 'UserState' %}" id="userStateForm">
+                {% if isFediverseUser %}
+                <input type="hidden" name="targetFedi" value="{{ targetUser.uuid }}">
+                {% else %}
+                <input type="hidden" name="target" value="{{ targetUser.username }}">
+                {% endif %}
+                <input type="hidden" name="changeState" value="" id="changeState">
+                {% csrf_token %}
+            </form>
+            {% endif %}
+            <div class="ui segment">
+                <div>
+                    {% if targetUser.is_bot %}<div class="ui grey label">Bot</div>{% endif %}
+                    {% if targetUser.is_manualFollow %}<div class="ui red label">フォロー承認が必要</div>{% endif %}
+                    {% if targetUserRelation.followed %}<div class="ui green label">フォローされています</div>{% endif %}
+                    {% if targetUserRelation.followPending %}<div class="ui orange label">フォロー処理中</div>{% endif %}
+                    {% if targetUserRelation.blocking %}<div class="ui red label">ブロック中</div>{% endif %}
+                    {% if targetUserRelation.muting %}<div class="ui orange label">ミュート中</div>{% endif %}
+                </div>
+                <div>
+                    {% if targetUser.description %}
+                        {{ targetUser.description|safe }}
+                    {% else %}
+                        <em>説明なし</em>
+                    {% endif %}
+                </div>
+                {% if not isFediverseUser %}
+                <hr>
+                <p>{{ targetUser.registered }} 登録</p>
+                {% endif %}
+            </div>
+            <div class="ui segment">
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="content">
+                            <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShow' targetUser.username targetUser.Host %}{% else %}{% url 'UserShow' targetUser.username %}{% endif %}">投稿</a>
+                            <div class="description">{{ targetUser.posts.all.count }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShowFollowing' targetUser.username targetUser.Host %}{% else %}{% url 'UserShowFollowing' targetUser.username %}{% endif %}">フォロー</a>
+                            <div class="description">{{ targetUserCount.following }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <a class="header" href="{% if isFediverseUser %}{% url 'FediUserShowFollower' targetUser.username targetUser.Host %}{% else %}{% url 'UserShowFollower' targetUser.username %}{% endif %}">フォロワー</a>
+                            <div class="description">{{ targetUserCount.followers }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="twelve wide column">
+            {% if user.is_authenticated and targetUserRelation.blocked %}
+            <div class="ui negative message">
+                <div class="header">
+                    表示できません。
+                </div>
+                <p>現在このユーザーにブロックされているため表示ができません。</p>
+            </div>
+            {% else %}
+            {% block side %}{% endblock %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated and targetUser != user %}
+    {% if targetUserRelation.muting %}
+    <div class="ui basic modal" id="userMuteConfirm">
+        <div class="ui icon header">
+        <i class="mute icon"></i>
+        ユーザーのミュートを解除
+        </div>
+        <div class="content">
+        <p>このユーザーのミュートを解除しますか？</p>
+        </div>
+        <div class="actions">
+        <div class="ui basic cancel inverted button">
+            <i class="remove icon"></i>
+            いいえ
+        </div>
+        <div class="ui orange ok inverted button">
+            <i class="checkmark icon"></i>
+            はい
+        </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="ui basic modal" id="userMuteConfirm">
+        <div class="ui icon header">
+        <i class="mute icon"></i>
+        ユーザーをミュート
+        </div>
+        <div class="content">
+        <p>このユーザーをミュートしますか？</p>
+        </div>
+        <div class="actions">
+        <div class="ui basic cancel inverted button">
+            <i class="remove icon"></i>
+            いいえ
+        </div>
+        <div class="ui orange ok inverted button">
+            <i class="checkmark icon"></i>
+            はい
+        </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if targetUserRelation.blocking %}
+    <div class="ui basic modal" id="userBlockConfirm">
+        <div class="ui icon header">
+        <i class="ban icon"></i>
+        ユーザーのブロックを解除
+        </div>
+        <div class="content">
+        <p>このユーザーのブロックを解除しますか？</p>
+        </div>
+        <div class="actions">
+        <div class="ui basic cancel inverted button">
+            <i class="remove icon"></i>
+            いいえ
+        </div>
+        <div class="ui negative ok inverted button">
+            <i class="ban icon"></i>
+            はい
+        </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="ui basic modal" id="userBlockConfirm">
+        <div class="ui icon header">
+        <i class="ban icon"></i>
+        ユーザーをブロック
+        </div>
+        <div class="content">
+        <p>このユーザーをブロックしようとしています。</p>
+        <p>ブロックするとフォローや投稿の閲覧が制限されます。本当に実行しますか？</p>
+        </div>
+        <div class="actions">
+        <div class="ui basic cancel inverted button">
+            <i class="remove icon"></i>
+            いいえ
+        </div>
+        <div class="ui negative ok inverted button">
+            <i class="ban icon"></i>
+            はい
+        </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+{% if user.is_authenticated and targetUser != user %}
+<script src="{% static 'userState.js' %}" type="text/javascript"></script>
+{% endif %}
+{% endblock %}

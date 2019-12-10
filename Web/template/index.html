@@ -24,29 +24,15 @@
         </div>
     </div>
     <div class="twelve wide column">
-        {% for posts in timeline %}
-        <div class="ui top attached segment" id="{{ posts.uuid }}">
-            <h4 class="ui header">
-                {% if posts.parent.display_name %}{{ posts.parent.display_name }}{% else %}{{ posts.parent.username }}{% endif %}
-                <div class="sub header">@{{ posts.parent.username }}</div>
-                <small>{{ posts.posted }}</small>
-            </h4>
-            <div class="post">
-                {{ posts.body|safe }}
+        {% for post in timeline %}
+        {% include 'module/postcard.html' %}
+        {% empty %}
+        <div class="ui icon message">
+            <i class="inbox icon"></i>
+            <div class="content">
+                <div class="header">投稿がありません。</div>
+                <p>このサーバーにはまだ何も投稿されていません。</p>
             </div>
-        </div>
-        <div class="ui bottom attached menu">
-            <a class="ui icon item link" href="{% url 'PostDetail' posts.uuid %}" title="詳細を表示">
-                <i class="linkify icon"></i>
-            </a>
-            {% if user.is_authenticated %}
-            <a class="ui icon item link" onclick="announce('{{ posts.uuid }}')" title="アナウンス">
-                <i class="retweet icon"></i>
-            </a>
-            <a class="ui icon item link" onclick="favorite('{{ posts.uuid }}')" title="お気に入り">
-                <i class="star icon"></i>
-            </a>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -75,6 +61,7 @@ function newPostIndex () {
             })
         })
         .fail(function (jqXHR) {
+            try {
             var res = JSON.parse(jqXHR.responseText)
             console.error("Post failed!: " + res.error.msg)
             $.uiAlert({
@@ -86,6 +73,17 @@ function newPostIndex () {
                 icon: 'remove circle',
                 time: 5,
             })
+            } catch (error) {
+            $.uiAlert({
+                textHead: '投稿できません。',
+                text: '不明なエラー',
+                bgcolor: '#DB2828',
+                textcolor: '#fff',
+                position: 'bottom-left',
+                icon: 'remove circle',
+                time: 5,
+            })
+            }
         })
         .always(function () {
             $('#postIndexSubmit').removeClass("disabled loading")

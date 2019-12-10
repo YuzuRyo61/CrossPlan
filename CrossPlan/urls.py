@@ -18,22 +18,39 @@ from django.urls import path, include
 
 from Web import views as WebViews
 from fediverse.views.WebFinger import WebFinger_HostMeta, WebFinger_res
+from fediverse.views.NodeInfo import NodeInfo, NodeInfo_wk
+from restAPI.urls import router as restAPI_router
 
 urlpatterns = [
     path('', WebViews.INDEX, name="INDEX"),
     path('ACP/', admin.site.urls),
     path('.well-known/hostmeta', WebFinger_HostMeta),
     path('.well-known/webfinger', WebFinger_res),
+    path('.well-known/nodeinfo', NodeInfo_wk),
+    path('nodeinfo/2.0', NodeInfo, name="NodeInfo"),
+    path('api/', include(restAPI_router.urls)),
     path('AP/', include('fediverse.urls')),
     path('user/<username>', WebViews.User, name="UserShow"),
+    path('user/<username>/following', WebViews.UserFollowing, name="UserShowFollowing"),
+    path('user/<username>/follower', WebViews.UserFollower, name="UserShowFollower"),
+    path('follow-approval', WebViews.followApproval, name="FollowApproval"),
     path('login', WebViews.LoginView.as_view(), name="Login"),
     path('logout', WebViews.LogoutView.as_view(), name="Logout"),
+    path('register', WebViews.RegisterView.as_view(), name="Register"),
     path('_NEWPOST', WebViews.newPost, name="NewPost"),
     path('_ANNOUNCE', WebViews.announce, name="Announce"),
     path('_FAVORITE', WebViews.favorite, name="Favorite"),
     path('_DELETEPOST', WebViews.postDelete, name="DeletePost"),
-    path('post/<uuid>', WebViews.postDetail,name="PostDetail"),
+    path('_USERSTATE', WebViews.userState, name="UserState"),
+    path('post/<uuid>', WebViews.postDetail, name="PostDetail"),
+    path('liked', WebViews.likedPosts, name="Liked_Posts"),
     path('settings/profile', WebViews.settings_profile, name="Settings_Profile"),
     path('settings/password', WebViews.settings_Password.as_view(), name="Settings_Password"),
-    path('settings/password/done', WebViews.settings_PasswordDone.as_view(), name="Settings_PasswordDone"),    
+    path('settings/password/done', WebViews.settings_PasswordDone.as_view(), name="Settings_PasswordDone"),
+    path('settings/privacy', WebViews.settings_privacy, name="Settings_Privacy"),
+    path('settings/deletion', WebViews.settings_deleteAccount, name="Settings_DeleteAccount"),
+    path('settings/deletion/done', WebViews.settings_deleteAccountDone, name="Settings_DeleteAccountDone"),
+    path('fediuser/<username>@<host>', WebViews.FediUser, name="FediUserShow"),
+    path('fediuser/<username>@<host>/following', WebViews.FediUserFollowing, name="FediUserShowFollowing"),
+    path('fediuser/<username>@<host>/follower', WebViews.FediUserFollower, name="FediUserShowFollower")
 ]

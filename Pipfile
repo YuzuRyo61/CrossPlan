@@ -1,0 +1,37 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+django = "==2.2.6"
+django-admin-list-filter-dropdown = "*"
+django-appconf = "*"
+django-celery-beat = "*"
+django-celery-results = "*"
+django-redis = "*"
+djangorestframework = "*"
+django-timezone-field = "*"
+django-widget-tweaks = "*"
+html2markdown = "*"
+psycopg2 = "*"
+pycryptodome = "*"
+python-dotenv = "*"
+requests = "*"
+requests-http-signature = "*"
+markdown = "*"
+channels = "*"
+channels-redis = "*"
+redis = "*"
+py-gfm = "*"
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+startdev = "python3 manage.py runserver 0:8000"
+worker = "celery -A CrossPlan worker -l info"
+migrate = "python3 manage.py migrate"

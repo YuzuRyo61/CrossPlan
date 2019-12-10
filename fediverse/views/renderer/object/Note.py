@@ -1,14 +1,15 @@
 from django.conf import settings
+from django.urls import reverse
 
-def RenderNote(idReverse, published, attrReverse, content, to, cc, url, replyReverse=None):
+def RenderNote(uuid, published, fromUser, content, to, cc, replyUrl=None):
     return {
-        "id": f"https://{settings.CP_ENDPOINT}{idReverse}",
+        "id": f"https://{settings.CP_ENDPOINT}{reverse('PostDetail', kwargs={'uuid': str(uuid)})}",
         "type": "Note",
         "published": published,
-        "attributedTo": f"https://{settings.CP_ENDPOINT}{attrReverse}",
-        "inReplyTo": f"https://{settings.CP_ENDPOINT}{replyReverse}" if replyReverse != None else None,
+        "attributedTo": f"https://{settings.CP_ENDPOINT}{reverse('UserShow', kwargs={'username': fromUser})}",
+        "inReplyTo": replyUrl if replyUrl != None else None,
         "content": content,
         "to": to,
         "cc": cc,
-        "url": url
+        "url": f"https://{settings.CP_ENDPOINT}{reverse('PostDetail', kwargs={'uuid': str(uuid)})}"
     }

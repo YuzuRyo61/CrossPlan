@@ -1,0 +1,48 @@
+{% extends '__head.html' %}
+
+{% block title %}いいねした投稿 | CrossPlan{% endblock %}
+
+{% block body %}
+<h1>いいねした投稿</h1>
+<hr>
+{% for post in likedPosts %}
+{% include 'module/postcard.html' %}
+{% if forloop.last %}
+<div class="ui centered grid">
+    <div class="center aligned column">
+        <div class="ui pagination menu">
+            {% if likedPosts.has_previous %}
+            <a class="item" href="?page={{ likedPosts.previous_page_number }}">前へ</a>
+            {% else %}
+            <div class="disabled item">前へ</div>
+            {% endif %}
+            {% for link_page in likedPosts.paginator.page_range %}
+                {% if link_page %}
+                    {% if link_page == likedPosts.number %}
+                    <a class="active item" href="#">{{ link_page }}</a>
+                    {% else %}
+                    <a class="item" href="?page={{ link_page }}">{{ link_page }}</a>
+                    {% endif %}
+                {% else %}
+                <div class="disabled item">...</div>
+                {% endif %}
+            {% endfor %}
+            {% if likedPosts.has_next %}
+            <a class="item" href="?page={{ likedPosts.next_page_number }}">次へ</a>
+            {% else %}
+            <div class="disabled item">次へ</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% empty %}
+<div class="ui icon message">
+    <i class="inbox icon"></i>
+    <div class="content">
+        <div class="header">いいねしていません。</div>
+        <p>気に入った投稿があったらどしどしいいねしてみましょう。</p>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

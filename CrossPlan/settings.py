@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import socket
+import logging
 from dotenv import load_dotenv
+from distutils.version import LooseVersion
+from distutils.util import strtobool
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,29 +31,37 @@ SECRET_KEY = os.environ.get('CP_SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get('CP_ENV', 'development') == 'development' else False
 
+if os.environ.get('CP_ENV', 'development') == 'development':
+    logging.basicConfig(level=logging.DEBUG)
+
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "192.168.1.18",
-    os.environ.get('CP_ENDPOINT', 'localhost')
+    os.environ.get('CP_ENDPOINT', 'localhost:8000')
 ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # SYSTEM
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Libraries
     'django_celery_beat',
     'django_celery_results',
     'widget_tweaks',
     'channels',
+    'django_admin_listfilter_dropdown',
+    'rest_framework',
+    # Projects
     'fediverse',
-    'Web'
+    'Web',
+    'restAPI',
 ]
 
 MIDDLEWARE = [
@@ -78,6 +89,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'CrossPlan.context_processors.DEFINE_COMMON_VARIABLE',
             ],
         },
     },
@@ -150,6 +162,9 @@ CELERY_BROKER_URL = f'redis://{os.environ.get("CP_REDIS_HOST", "localhost")}:{st
 
 CP_ENDPOINT = os.environ.get('CP_ENDPOINT', 'localhost:8000')
 
+with open(os.path.join(BASE_DIR, ".crossplan_version"), "r", encoding="utf-8") as cv:
+    CP_VERSION = LooseVersion(cv.readline().rstrip(os.linesep))
+
 ASGI_APPLICATION = 'CrossPlan.routing.application'
 
 CHANNEL_LAYERS = {
@@ -170,3 +185,7 @@ LOGIN_URL = "Login"
 LOGIN_REDIRECT_URL = "INDEX"
 
 OBJECT_PER_PAGE = 20
+
+USER_PER_PAGE = 10
+
+CP_OPENREGISTER = strtobool(os.environ.get('CP_OPENREGISTER', "true"))
