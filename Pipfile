@@ -34,6 +34,6 @@ django-cors-headers = "*"
 python_version = "3.7"
 
 [scripts]
-startdev = "python3 manage.py runserver 0:8000"
+startdev = "python manage.py runserver 0:8000"
 worker = "celery -A CrossPlan worker -l info"
-migrate = "python3 manage.py migrate"
+migrate = "python manage.py migrate"
