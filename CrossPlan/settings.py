@@ -196,9 +196,10 @@ CP_OPENREGISTER = strtobool(os.environ.get('CP_OPENREGISTER', "true"))
 CORS_ORIGIN_ALLOW_ALL = True
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-    }
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 OAUTH2_PROVIDER = {

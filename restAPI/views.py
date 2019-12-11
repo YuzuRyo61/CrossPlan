@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
+from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 
 from fediverse.models import User, FediverseUser, Post
 
@@ -21,3 +23,15 @@ class FediverseUserViewSet(viewsets.ReadOnlyModelViewSet):
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.all() # pylint: disable=no-member
     serializer_class = PostModelSerializer
+
+class myUserViewSet(viewsets.ViewSet):
+    """
+    自分のユーザーを表示します。
+    ※認証が必要（OAuthもしくはセッション）
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all() # pylint: disable=no-member
+
+    def get(self, request):
+        serializer = UserModelSerializer(get_object_or_404(self.queryset, username=request.user.username))
+        return Response(serializer.data)
