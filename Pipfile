@@ -7,7 +7,7 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
-django = "==2.2.6"
+django = "==2.2.27"
 django-admin-list-filter-dropdown = "*"
 django-appconf = "*"
 django-celery-beat = "*"
